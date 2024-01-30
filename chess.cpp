@@ -1,27 +1,31 @@
 #include <bits/stdc++.h>
 #include <fstream>
+#include <conio.h>
 using namespace std;
 
-string B1 = "R1K1B1KGQNB2K2R2";
-string B2 = "P1P2P3P4P5P6P7P8";
-string W1 = "r1k1b1qnkgb2k2r2";
-string W2 = "p1p2p3p4p5p6p7p8";
+string B1 = "R2K2B2KGQNB1K1R1";
+string B2 = "P8P7P6P5P4P3P2P1";
+string W1 = "r2k2b2kgqnb1k1r1";
+string W2 = "p8p7p6p5p4p3p2p1";
 string column = "ABCDEFGH";
 string spacer = "|----+----+----+----+----+----+----+----|";
 string spacer_ends = "-----------------------------------------";
 
 // TO-DO
 // add algorithm for each type of piece and moves like castling
-// read history and recreate the game's last move
 // try to make the black and white box pattern, or somehow immitate it
 
 class game
 {
     string board[8][8];
     ofstream history;
+    pair<int, int> current;
+    pair<int, int> final;
+    string piece;
 
 public:
     bool game_over = false;
+    int moves = 1;
 
     void reset_board()
     {
@@ -55,10 +59,10 @@ public:
         }
     }
 
-    void input(int n)
+    void input()
     {
         int delta;
-        if (n % 2 == 0)
+        if (moves % 2 == 0)
         {
             delta = 97;
         }
@@ -70,13 +74,19 @@ public:
         string input;
         bool valid = false;
         bool occur = false;
-        pair<int, int> current;
-        pair<int, int> final;
-        string piece;
 
         do
         {
+            if (moves % 2 == 0)
+            {
+                cout << "BLACK MOVE: ";
+            }
+            else
+            {
+                cout << "WHITE MOVE: ";
+            }
             cin >> input;
+            piece.clear();
             piece += input[0];
             piece += input[1];
             if (input[0] >= delta)
@@ -97,7 +107,7 @@ public:
             }
 
             final.first = input[3] - 49; // input[3] will be as char and not int data type
-            final.second = input[2] - 65;
+            final.second = abs(input[2] - 72);
 
             if (occur)
             {
@@ -116,6 +126,39 @@ public:
 
         board[final.first][final.second] = board[current.first][current.second];
         board[current.first][current.second] = "  ";
+        moves++;
+    }
+
+    void redo_history()
+    {
+        ifstream file("history.txt");
+        string line;
+
+        while (getline(file, line))
+        {
+            piece.clear();
+            piece += line[0];
+            piece += line[1];
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if (board[i][j] == piece)
+                    {
+                        current.first = i;
+                        current.second = j;
+                    }
+                }
+            }
+
+            final.first = line[3] - 49; // line[3] will be as char and not int data type
+            final.second = line[2] - 65;
+
+            board[final.first][final.second] = board[current.first][current.second];
+            board[current.first][current.second] = "  ";
+            moves++;
+        }
+        file.close();
     }
 
     bool algorithm()
@@ -123,16 +166,18 @@ public:
         return true; // test
     }
 
-    void print_board(int n)
+    void print_board()
     {
-        if (n % 2 == 0)
+
+        if (moves % 2 == 0)
         {
             cout << " ";
             for (int i = 0; i < 8; i++)
             {
-                cout << "    " << column[i];
+                cout << "    " << column[7 - i];
             }
             cout << endl;
+
             string spacer_local;
             for (int i = 0; i < 8; i++)
             {
@@ -150,14 +195,20 @@ public:
                 {
                     cout << " | " << board[i][j];
                 }
-                cout << " |" << endl;
+                cout << " | " << i + 1 << endl;
             }
             cout << "  " << spacer_ends << endl;
+            cout << " ";
+            for (int i = 0; i < 8; i++)
+            {
+                cout << "    " << column[7 - i];
+            }
+            cout << endl;
         }
         else
         {
             cout << " ";
-            for (int i = 7; i >= 0; i--)
+            for (int i = 0; i < 8; i++)
             {
                 cout << "    " << column[i];
             }
@@ -179,9 +230,15 @@ public:
                 {
                     cout << " | " << board[i][j];
                 }
-                cout << " |" << endl;
+                cout << " | " << i + 1 << endl;
             }
             cout << "  " << spacer_ends << endl;
+            cout << " ";
+            for (int i = 0; i < 8; i++)
+            {
+                cout << "    " << column[i];
+            }
+            cout << endl;
         }
     }
 };
@@ -189,12 +246,13 @@ public:
 int main()
 {
     game g;
-    int moves = 0;
     g.reset_board();
+    // g.redo_history();
+    g.print_board();
     while (!g.game_over)
     {
-        g.print_board(moves);
-        g.input(moves);
-        moves++;
+        g.input();
+        system("cls");
+        g.print_board();
     }
 }

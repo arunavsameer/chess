@@ -247,7 +247,7 @@ int main()
 {
     game g;
     g.reset_board();
-    // g.redo_history();
+    g.redo_history();
     g.print_board();
     while (!g.game_over)
     {

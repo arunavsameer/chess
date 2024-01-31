@@ -12,7 +12,8 @@ string spacer = "|----+----+----+----+----+----+----+----|";
 string spacer_ends = "-----------------------------------------";
 
 // TO-DO
-// add algorithm for each type of piece and moves like castling
+// add algorithm for each type of piece and moves like castling and en passant(google it)
+// add check and checkmate function that checks for check and checkmate
 // try to make the black and white box pattern, or somehow immitate it
 
 class game
@@ -161,9 +162,159 @@ public:
         file.close();
     }
 
+    bool check()
+    {
+    }
+
     bool algorithm()
     {
-        return true; // test
+        // pawn
+        if (piece[0] == 'p')
+        {
+            if (current.first == 6)
+            {
+                if (final.first == 5 || final.first == 4)
+                {
+                    if (current.second == final.second)
+                    {
+                        if (board[final.first][final.second] == "  ")
+                        {
+                            return true;
+                        }
+                    }
+                    else if (board[final.first][final.second] != "  " && (board[final.first][final.second])[0] < 97)
+                    {
+                        if (abs(current.second - final.second) == 1)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (current.first - final.first == 1)
+                {
+                    if (current.second == final.second)
+                    {
+                        if (board[final.first][final.second] == "  ")
+                        {
+                            return true;
+                        }
+                    }
+                    else if (board[final.first][final.second] != "  " && (board[final.first][final.second])[0] < 97)
+                    {
+                        if (abs(current.second - final.second) == 1)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (piece[0] == 'P')
+        {
+            if (current.first == 1)
+            {
+                if (final.first == 2 || final.first == 3)
+                {
+                    if (current.second == final.second)
+                    {
+                        if (board[final.first][final.second] == "  ")
+                        {
+                            return true;
+                        }
+                    }
+                    else if (board[final.first][final.second] != "  " && (board[final.first][final.second])[0] > 97)
+                    {
+                        if (abs(current.second - final.second) == 1)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (final.first - current.first == 1)
+                {
+                    if (current.second == final.second)
+                    {
+                        if (board[final.first][final.second] == "  ")
+                        {
+                            return true;
+                        }
+                    }
+                    else if (board[final.first][final.second] != "  " && (board[final.first][final.second])[0] > 97)
+                    {
+                        if (abs(current.second - final.second) == 1)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // rook
+        if (piece[0] == 'r' || piece[0] == 'R')
+        {
+            bool obstacle = false;
+            bool straight = false;
+            if (current.first == final.first)
+            {
+                straight = true;
+                for (int i = min(current.second, final.second) + 1; i < max(current.second, final.second); i++)
+                {
+                    if (board[current.first][i] != "  ")
+                    {
+                        obstacle = true;
+                        break;
+                    }
+                }
+            }
+            else if (current.second == final.second)
+            {
+                straight = true;
+                for (int i = min(current.first, final.first) + 1; i < max(current.first, final.first); i++)
+                {
+                    if (board[i][current.second] != "  ")
+                    {
+                        obstacle = true;
+                        break;
+                    }
+                }
+            }
+            if (!obstacle && straight)
+            {
+                if (board[final.first][final.second] != "  ")
+                {
+                    if (piece[0] == 'r')
+                    {
+                        if ((board[final.first][final.second])[0] < 97)
+                        {
+                            return true;
+                        }
+                    }
+                    else if (piece[0] == 'R')
+                    {
+                        if ((board[final.first][final.second])[0] > 97)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        // knight
+
+        return false;
     }
 
     void print_board()
@@ -247,12 +398,12 @@ int main()
 {
     game g;
     g.reset_board();
-    g.redo_history();
+    // g.redo_history();
     g.print_board();
     while (!g.game_over)
     {
         g.input();
-        system("cls");
+        // system("cls");
         g.print_board();
     }
 }

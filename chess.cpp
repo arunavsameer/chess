@@ -23,6 +23,7 @@ class game
     pair<int, int> current;
     pair<int, int> final;
     string piece;
+    bool kg_move, KG_move, R1_move, r1_move, R2_move, r2_move = false;
 
 public:
     bool game_over = false;
@@ -153,7 +154,7 @@ public:
             }
 
             final.first = line[3] - 49; // line[3] will be as char and not int data type
-            final.second = line[2] - 65;
+            final.second = abs(line[2] - 72);
 
             board[final.first][final.second] = board[current.first][current.second];
             board[current.first][current.second] = "  ";
@@ -401,6 +402,95 @@ public:
         // king
         if (piece == "KG" || piece == "kg")
         {
+            // castling
+            if (piece == "KG" && !KG_move)
+            {
+                bool obstacle = false;
+                int dir;
+                if (final.second > current.second)
+                {
+                    dir = 1;
+                }
+                else
+                {
+                    dir = -1;
+                }
+
+                if (board[final.first][final.second + dir] == "R1" && !R1_move)
+                {
+                    for (int i = current.second + dir; i < final.second; i += dir)
+                    {
+                        if (board[current.first][i] != "  ")
+                        {
+                            obstacle = true;
+                            break;
+                        }
+                    }
+                    if (!obstacle)
+                    {
+                        board[current.first][final.second - dir] = "R1";
+                        board[current.first][final.second + dir] = "  ";
+                        return true;
+                    }
+                }
+                else if (board[final.first][final.second + dir] == "R2" && !R2_move)
+                {
+                    for (int i = current.second + dir; i < final.second; i += dir)
+                    {
+                        if (board[current.first][i] != "  ")
+                        {
+                            obstacle = true;
+                            break;
+                        }
+                    }
+                    if (!obstacle)
+                    {
+                        board[current.first][final.second - dir] = "R2";
+                        board[current.first][final.second + dir] = "  ";
+                        return true;
+                    }
+                }
+            }
+            else if (piece == "kg" && !kg_move)
+            {
+                bool obstacle = false;
+                int dir;
+                if (board[final.first][final.second] == "r1" && !r1_move)
+                {
+                    for (int i = current.second + dir; i < final.second; i += dir)
+                    {
+                        if (board[current.first][i] != "  ")
+                        {
+                            obstacle = true;
+                            break;
+                        }
+                    }
+                    if (!obstacle)
+                    {
+                        board[current.first][final.second - dir] = "r1";
+                        board[current.first][final.second + dir] = "  ";
+                        return true;
+                    }
+                }
+                else if (board[final.first][final.second] == "r2" && !r2_move)
+                {
+                    for (int i = current.second + dir; i < final.second; i += dir)
+                    {
+                        if (board[current.first][i] != "  ")
+                        {
+                            obstacle = true;
+                            break;
+                        }
+                    }
+                    if (!obstacle)
+                    {
+                        board[current.first][final.second - dir] = "r2";
+                        board[current.first][final.second + dir] = "  ";
+                        return true;
+                    }
+                }
+            }
+            // king normal move
             if (abs(final.first - current.first) == 1 || abs(final.second - current.second) == 1)
             {
                 if ((board[final.first][final.second]) == "  ")
@@ -597,7 +687,7 @@ int main()
 {
     game g;
     g.reset_board();
-    // g.redo_history();
+    //g.redo_history();
     g.print_board();
     while (!g.game_over)
     {

@@ -22,6 +22,8 @@ class game
     ofstream history;
     pair<int, int> current;
     pair<int, int> final;
+    pair<int, int> KG = make_pair(0, 3);
+    pair<int, int> kg = make_pair(7, 3);
     string piece;
     bool kg_move, KG_move, R1_move, r1_move, R2_move, r2_move = false;
 
@@ -122,7 +124,7 @@ public:
 
             if (occur)
             {
-                if (algorithm())
+                if (algorithm() && !check())
                 {
                     valid = true;
                     history.open("history.txt", std::ios_base::app);
@@ -135,13 +137,17 @@ public:
             }
         } while (!valid);
 
-        // for castling
+        // for castling and checking check
         if (piece == "KG")
         {
+            KG.first = final.first;
+            KG.second = final.second;
             KG_move = true;
         }
         else if (piece == "kg")
         {
+            kg.first = final.first;
+            kg.second = final.second;
             kg_move = true;
         }
         else if (piece == "R1")
@@ -201,6 +207,312 @@ public:
 
     bool check()
     {
+        // check if the knight can attack the king, then check along straight and diagonal lines of any can attack the king
+        if (moves % 2 == 1)
+        {
+            cout << "hello" << endl;
+            // knight
+            // dont go out of range...
+            cout << "knight" << endl;
+            // pawn
+            if ((board[KG.first + 1][KG.second + 1])[0] == 'p')
+            {
+                return true;
+            }
+            else if ((board[KG.first + 1][KG.second - 1])[0] == 'p')
+            {
+                return true;
+            }
+            else if ((board[KG.first - 1][KG.second + 1])[0] == 'p')
+            {
+                return true;
+            }
+            else if ((board[KG.first - 1][KG.second - 1])[0] == 'p')
+            {
+                return true;
+            }
+            cout << "pawn" << endl;
+            // vertical line
+            for (int i = KG.first + 1; i < 8; i++)
+            {
+                if ((board[i][KG.second])[0] == 'q' || (board[i][KG.second])[0] == 'r')
+                {
+                    return true;
+                }
+                else if (board[i][KG.second] != "  ")
+                {
+                    break;
+                }
+            }
+            for (int i = KG.first - 1; i >= 0; i--)
+            {
+                if ((board[i][KG.second])[0] == 'q' || (board[i][KG.second])[0] == 'r')
+                {
+                    return true;
+                }
+                else if (board[i][KG.second] != "  ")
+                {
+                    break;
+                }
+            }
+            cout << "vl" << endl;
+            // horizontal line
+            for (int j = KG.second + 1; j < 8; j++)
+            {
+                if ((board[KG.first][j])[0] == 'q' || (board[KG.first][j])[0] == 'r')
+                {
+                    return true;
+                }
+                else if (board[KG.first][j] != "  ")
+                {
+                    break;
+                }
+            }
+            for (int j = KG.second - 1; j >= 0; j--)
+            {
+                if ((board[KG.first][j])[0] == 'q' || (board[KG.first][j])[0] == 'r')
+                {
+                    return true;
+                }
+                else if (board[KG.first][j] != "  ")
+                {
+                    break;
+                }
+            }
+            cout << "hl" << endl;
+            // diagonals
+            int i = KG.first + 1;
+            int j = KG.second + 1;
+            while (i != 8 && j != 8)
+            {
+                if ((board[i][i])[0] == 'b' || (board[i][i])[0] == 'q')
+                {
+                    return true;
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i++;
+                j++;
+            }
+
+            i = KG.first + 1;
+            j = KG.second - 1;
+            while (i != 8 && j != -1)
+            {
+                if ((board[i][i])[0] == 'b' || (board[i][i])[0] == 'q')
+                {
+                    return true;
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+            }
+            i++;
+            j--;
+
+            i = KG.first - 1;
+            j = KG.second + 1;
+            while (i != -1 && j != 8)
+            {
+                if ((board[i][i])[0] == 'b' || (board[i][i])[0] == 'q')
+                {
+                    return true;
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i--;
+                j++;
+            }
+
+            i = KG.first - 1;
+            j = KG.second - 1;
+            while (i != -1 && j != -1)
+            {
+                if ((board[i][i])[0] == 'b' || (board[i][i])[0] == 'q')
+                {
+                    return true;
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i--;
+                j--;
+            }
+        }
+        else
+        {
+            // knight
+            if ((board[kg.first + 1][kg.second + 2])[0] == 'K')
+            {
+                return true;
+            }
+            else if ((board[kg.first - 1][kg.second + 2])[0] == 'K')
+            {
+                return true;
+            }
+            else if ((board[kg.first + 1][kg.second - 2])[0] == 'K')
+            {
+                return true;
+            }
+            else if ((board[kg.first - 1][kg.second - 2])[0] == 'K')
+            {
+                return true;
+            }
+            else if ((board[kg.first + 2][kg.second + 1])[0] == 'K')
+            {
+                return true;
+            }
+            else if ((board[kg.first - 2][kg.second + 1])[0] == 'K')
+            {
+                return true;
+            }
+            else if ((board[kg.first + 2][kg.second - 1])[0] == 'K')
+            {
+                return true;
+            }
+            else if ((board[kg.first - 2][kg.second - 1])[0] == 'K')
+            {
+                return true;
+            }
+
+            // pawn
+            if ((board[kg.first + 1][kg.second + 1])[0] == 'P')
+            {
+                return true;
+            }
+            else if ((board[kg.first + 1][kg.second - 1])[0] == 'P')
+            {
+                return true;
+            }
+            else if ((board[kg.first - 1][kg.second + 1])[0] == 'P')
+            {
+                return true;
+            }
+            else if ((board[kg.first - 1][kg.second - 1])[0] == 'P')
+            {
+                return true;
+            }
+
+            // vertical line
+            for (int i = kg.first + 1; i < 8; i++)
+            {
+                if ((board[i][kg.second])[0] == 'Q' || (board[i][kg.second])[0] == 'R')
+                {
+                    return true;
+                }
+                else if (board[i][kg.second] != "  ")
+                {
+                    break;
+                }
+            }
+            for (int i = kg.first - 1; i >= 0; i--)
+            {
+                if ((board[i][kg.second])[0] == 'Q' || (board[i][kg.second])[0] == 'R')
+                {
+                    return true;
+                }
+                else if (board[i][kg.second] != "  ")
+                {
+                    break;
+                }
+            }
+
+            // horizontal line
+            for (int j = kg.second + 1; j < 8; j++)
+            {
+                if ((board[kg.first][j])[0] == 'Q' || (board[kg.first][j])[0] == 'R')
+                {
+                    return true;
+                }
+                else if (board[kg.first][j] != "  ")
+                {
+                    break;
+                }
+            }
+            for (int j = kg.second - 1; j >= 0; j--)
+            {
+                if ((board[kg.first][j])[0] == 'Q' || (board[kg.first][j])[0] == 'R')
+                {
+                    return true;
+                }
+                else if (board[kg.first][j] != "  ")
+                {
+                    break;
+                }
+            }
+
+            // diagonals
+            int i = kg.first + 1;
+            int j = kg.second + 1;
+            while (i != 8 && j != 8)
+            {
+                if ((board[i][i])[0] == 'B' || (board[i][i])[0] == 'Q')
+                {
+                    return true;
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i++;
+                j++;
+            }
+
+            i = kg.first + 1;
+            j = kg.second - 1;
+            while (i != 8 && j != -1)
+            {
+                if ((board[i][i])[0] == 'B' || (board[i][i])[0] == 'Q')
+                {
+                    return true;
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+            }
+            i++;
+            j--;
+
+            i = kg.first - 1;
+            j = kg.second + 1;
+            while (i != -1 && j != 8)
+            {
+                if ((board[i][i])[0] == 'B' || (board[i][i])[0] == 'Q')
+                {
+                    return true;
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i--;
+                j++;
+            }
+
+            i = kg.first - 1;
+            j = kg.second - 1;
+            while (i != -1 && j != -1)
+            {
+                if ((board[i][i])[0] == 'B' || (board[i][i])[0] == 'Q')
+                {
+                    return true;
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i--;
+                j--;
+            }
+        }
+        return false;
     }
 
     bool algorithm()

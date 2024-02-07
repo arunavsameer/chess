@@ -12,7 +12,7 @@ string spacer = "|----+----+----+----+----+----+----+----|";
 string spacer_ends = "-----------------------------------------";
 
 // TO-DO
-// add algorithm for moves like castling and en passant(google it)
+// add algorithm for en passant(google it)
 // add check and checkmate function that checks for check and checkmate
 // try to make the black and white box pattern, or somehow immitate it
 
@@ -59,6 +59,15 @@ public:
             board[7][i] += W1[(2 * i)];
             board[7][i] += W1[(2 * i) + 1];
         }
+        // for(int i = 0; i < 8; i++){
+        //     for(int j = 0; j < 8; j++){
+        //         if(board[i][j] == "  "){
+        //             if((i + j) % 2 == 0){
+        //                 board[i][j] = "||";
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     void input()
@@ -126,6 +135,33 @@ public:
             }
         } while (!valid);
 
+        // for castling
+        if (piece == "KG")
+        {
+            KG_move = true;
+        }
+        else if (piece == "kg")
+        {
+            kg_move = true;
+        }
+        else if (piece == "R1")
+        {
+            R1_move = true;
+        }
+        else if (piece == "R2")
+        {
+            R2_move = true;
+        }
+        else if (piece == "r1")
+        {
+            r1_move = true;
+        }
+        else if (piece == "r2")
+        {
+            r2_move = true;
+        }
+
+        // doing the move after checks
         board[final.first][final.second] = board[current.first][current.second];
         board[current.first][current.second] = "  ";
         moves++;
@@ -282,12 +318,11 @@ public:
                 {
                     if (board[i][current.second] != "  ")
                     {
-                        obstacle = true;
-                        break;
+                        return false;
                     }
                 }
             }
-            if (!obstacle && straight)
+            if (straight)
             {
                 if (board[final.first][final.second] != "  ")
                 {
@@ -342,7 +377,6 @@ public:
         // bishop
         if (piece[0] == 'b' || piece[0] == 'B')
         {
-            bool obstacle = false;
             if (abs(final.first - current.first) == abs(final.second - current.second))
             {
                 int dir_x, dir_y;
@@ -368,32 +402,28 @@ public:
                 {
                     if (board[i][j] != "  ")
                     {
-                        obstacle = true;
-                        break;
+                        return false;
                     }
                     i += dir_x;
                     j += dir_y;
                 }
 
-                if (!obstacle)
+                if (board[final.first][final.second] == "  ")
                 {
-                    if (board[final.first][final.second] == "  ")
+                    return true;
+                }
+                else if (piece[0] == 'b')
+                {
+                    if ((board[final.first][final.second])[0] < 97)
                     {
                         return true;
                     }
-                    else if (piece[0] == 'b')
+                }
+                else if (piece[0] == 'B')
+                {
+                    if ((board[final.first][final.second])[0] > 97)
                     {
-                        if ((board[final.first][final.second])[0] < 97)
-                        {
-                            return true;
-                        }
-                    }
-                    else if (piece[0] == 'B')
-                    {
-                        if ((board[final.first][final.second])[0] > 97)
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -416,78 +446,75 @@ public:
                     dir = -1;
                 }
 
-                if (board[final.first][final.second + dir] == "R1" && !R1_move)
+                if (board[final.first][final.second + (2 * dir)] == "R1" && !R1_move)
                 {
-                    for (int i = current.second + dir; i < final.second; i += dir)
+                    for (int i = current.second + dir; i != final.second + (2 * dir); i += dir)
                     {
                         if (board[current.first][i] != "  ")
                         {
-                            obstacle = true;
-                            break;
+                            return false;
                         }
                     }
-                    if (!obstacle)
-                    {
-                        board[current.first][final.second - dir] = "R1";
-                        board[current.first][final.second + dir] = "  ";
-                        return true;
-                    }
+                    board[current.first][final.second - dir] = "R1";
+                    board[current.first][final.second + (2 * dir)] = "  ";
+                    return true;
                 }
                 else if (board[final.first][final.second + dir] == "R2" && !R2_move)
                 {
-                    for (int i = current.second + dir; i < final.second; i += dir)
+                    int i = current.first + dir;
+                    while (i != final.second)
                     {
                         if (board[current.first][i] != "  ")
                         {
-                            obstacle = true;
-                            break;
+                            return false;
                         }
+                        i += dir;
                     }
-                    if (!obstacle)
-                    {
-                        board[current.first][final.second - dir] = "R2";
-                        board[current.first][final.second + dir] = "  ";
-                        return true;
-                    }
+
+                    board[current.first][final.second - dir] = "R2";
+                    board[current.first][final.second + dir] = "  ";
+                    return true;
                 }
             }
             else if (piece == "kg" && !kg_move)
             {
                 bool obstacle = false;
                 int dir;
-                if (board[final.first][final.second] == "r1" && !r1_move)
+                if (final.second > current.second)
                 {
-                    for (int i = current.second + dir; i < final.second; i += dir)
+                    dir = 1;
+                }
+                else
+                {
+                    dir = -1;
+                }
+                if (board[final.first][final.second + (2 * dir)] == "r1" && !r1_move)
+                {
+                    for (int i = current.second + dir; i != final.second + (2 * dir); i += dir)
                     {
                         if (board[current.first][i] != "  ")
                         {
-                            obstacle = true;
-                            break;
+                            return false;
                         }
                     }
-                    if (!obstacle)
-                    {
-                        board[current.first][final.second - dir] = "r1";
-                        board[current.first][final.second + dir] = "  ";
-                        return true;
-                    }
+
+                    board[current.first][final.second - dir] = "r1";
+                    board[current.first][final.second + (2 * dir)] = "  ";
+                    return true;
                 }
                 else if (board[final.first][final.second] == "r2" && !r2_move)
                 {
-                    for (int i = current.second + dir; i < final.second; i += dir)
+                    for (int i = current.second + dir; i != final.second; i += dir)
                     {
                         if (board[current.first][i] != "  ")
                         {
-                            obstacle = true;
-                            break;
+                            return false;
                         }
                     }
-                    if (!obstacle)
-                    {
-                        board[current.first][final.second - dir] = "r2";
-                        board[current.first][final.second + dir] = "  ";
-                        return true;
-                    }
+
+                    board[current.first][final.second - dir] = "r2";
+                    board[current.first][final.second + dir] = "  ";
+                    return true;
                 }
             }
             // king normal move
@@ -608,7 +635,16 @@ public:
 
     void print_board()
     {
-
+        // find something better to make white spaces
+        //   for(int i = 0; i < 8; i++){
+        //      for(int j = 0; j < 8; j++){
+        //          if(board[i][j] == "  "){
+        //              if((i + j) % 2 == 0){
+        //                  board[i][j] = "||";
+        //              }
+        //          }
+        //      }
+        //  }
         if (moves % 2 == 0)
         {
             cout << " ";
@@ -687,7 +723,7 @@ int main()
 {
     game g;
     g.reset_board();
-    //g.redo_history();
+    g.redo_history();
     g.print_board();
     while (!g.game_over)
     {

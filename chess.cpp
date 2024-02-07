@@ -12,7 +12,7 @@ string spacer = "|----+----+----+----+----+----+----+----|";
 string spacer_ends = "-----------------------------------------";
 
 // TO-DO
-// add algorithm for each type of piece and moves like castling and en passant(google it)
+// add algorithm for moves like castling and en passant(google it)
 // add check and checkmate function that checks for check and checkmate
 // try to make the black and white box pattern, or somehow immitate it
 
@@ -313,6 +313,205 @@ public:
         }
 
         // knight
+        if (piece[0] == 'k' || piece[0] == 'K')
+        {
+            if ((abs(current.first - final.first) == 2 && abs(current.second - final.second) == 1) || (abs(current.first - final.first) == 1 && abs(current.second - final.second) == 2))
+            {
+                if (board[final.first][final.second] == "  ")
+                {
+                    return true;
+                }
+                else if (piece[0] == 'K')
+                {
+                    if ((board[final.first][final.second])[0] > 97)
+                    {
+                        return true;
+                    }
+                }
+                else if (piece[0] == 'k')
+                {
+                    if ((board[final.first][final.second])[0] < 97)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // bishop
+        if (piece[0] == 'b' || piece[0] == 'B')
+        {
+            bool obstacle = false;
+            if (abs(final.first - current.first) == abs(final.second - current.second))
+            {
+                int dir_x, dir_y;
+                if (final.first > current.first)
+                {
+                    dir_x = 1;
+                }
+                else
+                {
+                    dir_x = -1;
+                }
+                if (final.second > current.second)
+                {
+                    dir_y = 1;
+                }
+                else
+                {
+                    dir_y = -1;
+                }
+                int i = current.first + dir_x;
+                int j = current.second + dir_y;
+                while (i != final.first)
+                {
+                    if (board[i][j] != "  ")
+                    {
+                        obstacle = true;
+                        break;
+                    }
+                    i += dir_x;
+                    j += dir_y;
+                }
+
+                if (!obstacle)
+                {
+                    if (board[final.first][final.second] == "  ")
+                    {
+                        return true;
+                    }
+                    else if (piece[0] == 'b')
+                    {
+                        if ((board[final.first][final.second])[0] < 97)
+                        {
+                            return true;
+                        }
+                    }
+                    else if (piece[0] == 'B')
+                    {
+                        if ((board[final.first][final.second])[0] > 97)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // king
+        if (piece == "KG" || piece == "kg")
+        {
+            if (abs(final.first - current.first) == 1 || abs(final.second - current.second) == 1)
+            {
+                if ((board[final.first][final.second]) == "  ")
+                {
+                    return true;
+                }
+                else if (piece == "KG")
+                {
+                    if ((board[final.first][final.second])[0] > 97)
+                    {
+                        return true;
+                    }
+                }
+                else if (piece == "kg")
+                {
+                    if ((board[final.first][final.second])[0] < 97)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // queen
+        if (piece == "qn" || piece == "QN")
+        {
+            bool obstacle = false;
+            if ((abs(final.first - current.first) == abs(final.second - current.second)) || (current.first == final.first) || (current.second == final.second))
+            {
+                int dir_x;
+                int dir_y;
+                if (current.first == final.first)
+                {
+                    dir_x = 0;
+                    if (final.second > current.second)
+                    {
+                        dir_y = 1;
+                    }
+                    else
+                    {
+                        dir_y = -1;
+                    }
+                }
+                else if (current.second == final.second)
+                {
+                    dir_y = 0;
+                    if (final.first > current.first)
+                    {
+                        dir_x = 1;
+                    }
+                    else
+                    {
+                        dir_x = -1;
+                    }
+                }
+                else if (abs(final.first - current.first) == abs(final.second - current.second))
+                {
+                    if (final.first > current.first)
+                    {
+                        dir_x = 1;
+                    }
+                    else
+                    {
+                        dir_x = -1;
+                    }
+                    if (final.second > current.second)
+                    {
+                        dir_y = 1;
+                    }
+                    else
+                    {
+                        dir_y = -1;
+                    }
+                }
+
+                int i = current.first + dir_x;
+                int j = current.second + dir_y;
+
+                while (i != final.first && j != final.second)
+                {
+                    if (board[i][j] != "  ")
+                    {
+                        obstacle = true;
+                        break;
+                    }
+                    i += dir_x;
+                    j += dir_y;
+                }
+                if (!obstacle)
+                {
+                    if (board[final.first][final.second] == "  ")
+                    {
+                        return true;
+                    }
+                    else if (piece == "qn")
+                    {
+                        if ((board[final.first][final.second])[0] < 97)
+                        {
+                            return true;
+                        }
+                    }
+                    else if (piece == "QN")
+                    {
+                        if ((board[final.first][final.second])[0] > 97)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
 
         return false;
     }

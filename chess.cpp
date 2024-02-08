@@ -12,8 +12,7 @@ string spacer = "|----+----+----+----+----+----+----+----|";
 string spacer_ends = "-----------------------------------------";
 
 // TO-DO
-// add algorithm for en passant(google it)
-// add check and checkmate function that checks for check and checkmate
+// add checkmate function
 // try to make the black and white box pattern, or somehow immitate it
 
 class game
@@ -124,18 +123,16 @@ public:
 
             if (occur)
             {
-                if (algorithm() && !check())
+                if (algorithm())
                 {
                     valid = true;
-                    history.open("history.txt", std::ios_base::app);
-                    if (history.is_open())
-                    {
-                        history << input << endl;
-                    }
-                    history.close();
                 }
             }
         } while (!valid);
+
+        // doing the checks after move
+        board[final.first][final.second] = piece;
+        board[current.first][current.second] = "  ";
 
         // for castling and checking check
         if (piece == "KG")
@@ -167,9 +164,32 @@ public:
             r2_move = true;
         }
 
-        // doing the move after checks
-        board[final.first][final.second] = board[current.first][current.second];
-        board[current.first][current.second] = "  ";
+        if (check())
+        {
+            cout << "CHECK!" << endl;
+            board[current.first][current.second] = piece;
+            board[final.first][final.second] = "  ";
+            if (piece == "KG")
+            {
+                KG.first = current.first;
+                KG.second = current.second;
+            }
+            else if (piece == "kg")
+            {
+                kg.first = current.first;
+                kg.second = current.second;
+            }
+
+            return;
+        }
+
+        history.open("history.txt", std::ios_base::app);
+        if (history.is_open())
+        {
+            history << input << endl;
+        }
+        history.close();
+
         moves++;
     }
 
@@ -207,13 +227,69 @@ public:
 
     bool check()
     {
-        // check if the knight can attack the king, then check along straight and diagonal lines of any can attack the king
+        // cout << "checking" << endl;
+        //  check if the knight can attack the king, then check along straight and diagonal lines of any can attack the king
         if (moves % 2 == 1)
         {
-            cout << "hello" << endl;
             // knight
-            // dont go out of range...
-            cout << "knight" << endl;
+            if (KG.first >= 1 && KG.second >= 2)
+            {
+                if ((board[KG.first - 1][KG.second - 2])[0] == 'k')
+                {
+                    return true;
+                }
+            }
+            else if (KG.first >= 2 && KG.second >= 1)
+            {
+                if ((board[KG.first - 2][KG.second - 1])[0] == 'k')
+                {
+                    return true;
+                }
+            }
+            else if (KG.first >= 1 && KG.second <= 5)
+            {
+                if ((board[KG.first - 1][KG.second + 2])[0] == 'k')
+                {
+                    return true;
+                }
+            }
+            else if (KG.first <= 6 && KG.second >= 2)
+            {
+                if ((board[KG.first + 1][KG.second - 2])[0] == 'k')
+                {
+                    return true;
+                }
+            }
+            else if (KG.first <= 6 && KG.second <= 5)
+            {
+                if ((board[KG.first + 1][KG.second + 2])[0] == 'k')
+                {
+                    return true;
+                }
+            }
+            else if (KG.first <= 5 && KG.second <= 6)
+            {
+                if ((board[KG.first + 2][KG.second + 1])[0] == 'k')
+                {
+                    return true;
+                }
+            }
+            else if (KG.first >= 2 && KG.second <= 1)
+            {
+                if ((board[KG.first - 2][KG.second + 1])[0] == 'k')
+                {
+                    return true;
+                }
+            }
+            else if (KG.first <= 5 && KG.second >= 1)
+            {
+                if ((board[KG.first + 2][KG.second - 1])[0] == 'k')
+                {
+                    return true;
+                }
+            }
+            // cout << "knight" << endl;
+
             // pawn
             if ((board[KG.first + 1][KG.second + 1])[0] == 'p')
             {
@@ -223,16 +299,8 @@ public:
             {
                 return true;
             }
-            else if ((board[KG.first - 1][KG.second + 1])[0] == 'p')
-            {
-                return true;
-            }
-            else if ((board[KG.first - 1][KG.second - 1])[0] == 'p')
-            {
-                return true;
-            }
-            cout << "pawn" << endl;
-            // vertical line
+            // cout << "pawn" << endl;
+            //  vertical line
             for (int i = KG.first + 1; i < 8; i++)
             {
                 if ((board[i][KG.second])[0] == 'q' || (board[i][KG.second])[0] == 'r')
@@ -255,8 +323,8 @@ public:
                     break;
                 }
             }
-            cout << "vl" << endl;
-            // horizontal line
+            // cout << "vertical" << endl;
+            //  horizontal line
             for (int j = KG.second + 1; j < 8; j++)
             {
                 if ((board[KG.first][j])[0] == 'q' || (board[KG.first][j])[0] == 'r')
@@ -279,14 +347,17 @@ public:
                     break;
                 }
             }
-            cout << "hl" << endl;
-            // diagonals
+            // cout << "horizontal" << endl;
+            //  diagonals
             int i = KG.first + 1;
             int j = KG.second + 1;
             while (i != 8 && j != 8)
             {
-                if ((board[i][i])[0] == 'b' || (board[i][i])[0] == 'q')
+                if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
+                    cout << KG.first << " " << KG.second << " " << i << " " << j << endl;
+                    cout << board[i][j];
+                    // cout << " found" << endl;
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -296,12 +367,12 @@ public:
                 i++;
                 j++;
             }
-
+            // cout << "diag" << endl;
             i = KG.first + 1;
             j = KG.second - 1;
             while (i != 8 && j != -1)
             {
-                if ((board[i][i])[0] == 'b' || (board[i][i])[0] == 'q')
+                if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
                     return true;
                 }
@@ -309,15 +380,16 @@ public:
                 {
                     break;
                 }
+                i++;
+                j--;
             }
-            i++;
-            j--;
 
+            // cout << "diag" << endl;
             i = KG.first - 1;
             j = KG.second + 1;
             while (i != -1 && j != 8)
             {
-                if ((board[i][i])[0] == 'b' || (board[i][i])[0] == 'q')
+                if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
                     return true;
                 }
@@ -328,12 +400,12 @@ public:
                 i--;
                 j++;
             }
-
+            // cout << "diag" << endl;
             i = KG.first - 1;
             j = KG.second - 1;
             while (i != -1 && j != -1)
             {
-                if ((board[i][i])[0] == 'b' || (board[i][i])[0] == 'q')
+                if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
                     return true;
                 }
@@ -344,53 +416,70 @@ public:
                 i--;
                 j--;
             }
+            // cout << "diag" << endl;
         }
         else
         {
             // knight
-            if ((board[kg.first + 1][kg.second + 2])[0] == 'K')
+            if (KG.first >= 1 && KG.second >= 2)
             {
-                return true;
+                if ((board[KG.first - 1][KG.second - 2])[0] == 'k')
+                {
+                    return true;
+                }
             }
-            else if ((board[kg.first - 1][kg.second + 2])[0] == 'K')
+            else if (KG.first >= 2 && KG.second >= 1)
             {
-                return true;
+                if ((board[KG.first - 2][KG.second - 1])[0] == 'k')
+                {
+                    return true;
+                }
             }
-            else if ((board[kg.first + 1][kg.second - 2])[0] == 'K')
+            else if (KG.first >= 1 && KG.second <= 5)
             {
-                return true;
+                if ((board[KG.first - 1][KG.second + 2])[0] == 'k')
+                {
+                    return true;
+                }
             }
-            else if ((board[kg.first - 1][kg.second - 2])[0] == 'K')
+            else if (KG.first <= 6 && KG.second >= 2)
             {
-                return true;
+                if ((board[KG.first + 1][KG.second - 2])[0] == 'k')
+                {
+                    return true;
+                }
             }
-            else if ((board[kg.first + 2][kg.second + 1])[0] == 'K')
+            else if (KG.first <= 6 && KG.second <= 5)
             {
-                return true;
+                if ((board[KG.first + 1][KG.second + 2])[0] == 'k')
+                {
+                    return true;
+                }
             }
-            else if ((board[kg.first - 2][kg.second + 1])[0] == 'K')
+            else if (KG.first <= 5 && KG.second <= 6)
             {
-                return true;
+                if ((board[KG.first + 2][KG.second + 1])[0] == 'k')
+                {
+                    return true;
+                }
             }
-            else if ((board[kg.first + 2][kg.second - 1])[0] == 'K')
+            else if (KG.first >= 2 && KG.second <= 1)
             {
-                return true;
+                if ((board[KG.first - 2][KG.second + 1])[0] == 'k')
+                {
+                    return true;
+                }
             }
-            else if ((board[kg.first - 2][kg.second - 1])[0] == 'K')
+            else if (KG.first <= 5 && KG.second >= 1)
             {
-                return true;
+                if ((board[KG.first + 2][KG.second - 1])[0] == 'k')
+                {
+                    return true;
+                }
             }
 
             // pawn
-            if ((board[kg.first + 1][kg.second + 1])[0] == 'P')
-            {
-                return true;
-            }
-            else if ((board[kg.first + 1][kg.second - 1])[0] == 'P')
-            {
-                return true;
-            }
-            else if ((board[kg.first - 1][kg.second + 1])[0] == 'P')
+            if ((board[kg.first - 1][kg.second + 1])[0] == 'P')
             {
                 return true;
             }
@@ -476,9 +565,9 @@ public:
                 {
                     break;
                 }
+                i++;
+                j--;
             }
-            i++;
-            j--;
 
             i = kg.first - 1;
             j = kg.second + 1;
@@ -745,6 +834,7 @@ public:
         if (piece == "KG" || piece == "kg")
         {
             // castling
+
             if (piece == "KG" && !KG_move)
             {
                 bool obstacle = false;
@@ -760,6 +850,10 @@ public:
 
                 if (board[final.first][final.second + (2 * dir)] == "R1" && !R1_move)
                 {
+                    if (check())
+                    {
+                        return false;
+                    }
                     for (int i = current.second + dir; i != final.second + (2 * dir); i += dir)
                     {
                         if (board[current.first][i] != "  ")
@@ -773,6 +867,10 @@ public:
                 }
                 else if (board[final.first][final.second + dir] == "R2" && !R2_move)
                 {
+                    if (check())
+                    {
+                        return false;
+                    }
                     int i = current.first + dir;
                     while (i != final.second)
                     {
@@ -790,6 +888,7 @@ public:
             }
             else if (piece == "kg" && !kg_move)
             {
+
                 bool obstacle = false;
                 int dir;
                 if (final.second > current.second)
@@ -802,6 +901,10 @@ public:
                 }
                 if (board[final.first][final.second + (2 * dir)] == "r1" && !r1_move)
                 {
+                    if (check())
+                    {
+                        return false;
+                    }
                     for (int i = current.second + dir; i != final.second + (2 * dir); i += dir)
                     {
                         if (board[current.first][i] != "  ")
@@ -816,6 +919,10 @@ public:
                 }
                 else if (board[final.first][final.second] == "r2" && !r2_move)
                 {
+                    if (check())
+                    {
+                        return false;
+                    }
                     for (int i = current.second + dir; i != final.second; i += dir)
                     {
                         if (board[current.first][i] != "  ")
@@ -1040,7 +1147,7 @@ int main()
     while (!g.game_over)
     {
         g.input();
-        // system("cls");
+        system("cls");
         g.print_board();
     }
 }

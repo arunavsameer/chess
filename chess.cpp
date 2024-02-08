@@ -13,7 +13,6 @@ string spacer_ends = "-----------------------------------------";
 
 // TO-DO
 // add checkmate function
-// try to make the black and white box pattern, or somehow immitate it
 
 class game
 {
@@ -1074,16 +1073,6 @@ public:
 
     void print_board()
     {
-        // find something better to make white spaces
-        //   for(int i = 0; i < 8; i++){
-        //      for(int j = 0; j < 8; j++){
-        //          if(board[i][j] == "  "){
-        //              if((i + j) % 2 == 0){
-        //                  board[i][j] = "||";
-        //              }
-        //          }
-        //      }
-        //  }
         if (moves % 2 == 0)
         {
             cout << " ";
@@ -1108,7 +1097,22 @@ public:
                      << i + 1;
                 for (int j = 0; j < 8; j++)
                 {
-                    cout << " | " << board[i][j];
+                    cout << " | ";
+                    if (board[i][j] != "  ")
+                    {
+                        cout << board[i][j];
+                    }
+                    else
+                    {
+                        if ((i + j) % 2 == 0)
+                        {
+                            cout << "::";
+                        }
+                        else
+                        {
+                            cout << "  ";
+                        }
+                    }
                 }
                 cout << " | " << i + 1 << endl;
             }
@@ -1143,7 +1147,22 @@ public:
                      << i + 1;
                 for (int j = 7; j >= 0; j--)
                 {
-                    cout << " | " << board[i][j];
+                    cout << " | ";
+                    if (board[i][j] != "  ")
+                    {
+                        cout << board[i][j];
+                    }
+                    else
+                    {
+                        if ((i + j) % 2 == 0)
+                        {
+                            cout << "::";
+                        }
+                        else
+                        {
+                            cout << "  ";
+                        }
+                    }
                 }
                 cout << " | " << i + 1 << endl;
             }

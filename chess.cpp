@@ -73,6 +73,19 @@ public:
 
     void input()
     {
+        if (check())
+        {
+            if (!checkmate())
+            {
+                cout << "CHECK!" << endl;
+            }
+            else
+            {
+                cout << "CHECKMATE!";
+                game_over = true;
+            }
+        }
+
         int delta;
         if (moves % 2 == 0)
         {
@@ -166,6 +179,7 @@ public:
 
         if (check())
         {
+
             cout << "CHECK!" << endl;
             board[current.first][current.second] = piece;
             board[final.first][final.second] = "  ";
@@ -355,9 +369,9 @@ public:
             {
                 if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
-                    cout << KG.first << " " << KG.second << " " << i << " " << j << endl;
-                    cout << board[i][j];
-                    // cout << " found" << endl;
+                    // cout << KG.first << " " << KG.second << " " << i << " " << j << endl;
+                    // cout << board[i][j];
+                    //  cout << " found" << endl;
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -601,6 +615,12 @@ public:
                 j--;
             }
         }
+        return false;
+    }
+
+    bool checkmate()
+    {
+
         return false;
     }
 

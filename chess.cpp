@@ -13,6 +13,7 @@ string spacer_ends = "-----------------------------------------";
 
 // TO-DO
 // add checkmate function
+// add en passant move using history last line or any other way
 
 class game
 {
@@ -22,8 +23,10 @@ class game
     pair<int, int> final;
     pair<int, int> KG = make_pair(0, 3);
     pair<int, int> kg = make_pair(7, 3);
+    vector<pair<int, int>> threat;
     string piece;
     bool kg_move, KG_move, R1_move, r1_move, R2_move, r2_move = false;
+    int king_x, king_y;
 
 public:
     bool game_over = false;
@@ -59,29 +62,32 @@ public:
             board[7][i] += W1[(2 * i)];
             board[7][i] += W1[(2 * i) + 1];
         }
-        // for(int i = 0; i < 8; i++){
-        //     for(int j = 0; j < 8; j++){
-        //         if(board[i][j] == "  "){
-        //             if((i + j) % 2 == 0){
-        //                 board[i][j] = "||";
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     void input()
     {
-        if (check())
+        if (moves % 2 == 1)
+        {
+            king_x = KG.first;
+            king_y = KG.second;
+        }
+        else
+        {
+            king_x = kg.first;
+            king_y = kg.second;
+        }
+
+        if (check(king_x, king_y))
         {
             if (!checkmate())
             {
-                cout << "CHECK!" << endl;
+                // cout << "CHECK!" << endl;
             }
             else
             {
-                cout << "CHECKMATE!";
+                // cout << "CHECKMATE!";
                 game_over = true;
+                return;
             }
         }
 
@@ -176,7 +182,18 @@ public:
             r2_move = true;
         }
 
-        if (check())
+        if (moves % 2 == 1)
+        {
+            king_x = KG.first;
+            king_y = KG.second;
+        }
+        else
+        {
+            king_x = kg.first;
+            king_y = kg.second;
+        }
+
+        if (check(king_x, king_y))
         {
 
             cout << "CHECK!" << endl;
@@ -238,65 +255,76 @@ public:
         file.close();
     }
 
-    bool check()
+    bool check(int x, int y)
     {
         // cout << "checking" << endl;
-        //  check if the knight can attack the king, then check along straight and diagonal lines of any can attack the king
         if (moves % 2 == 1)
         {
+            // king
+            for (int i = max(0, king_x - 1); i <= min(7, king_x + 1); i++)
+            {
+                for (int j = max(0, king_y - 1); j <= min(7, king_y + 1); j++)
+                {
+                    if (board[i][j] == "kg")
+                    {
+                        return true;
+                    }
+                }
+            }
+
             // knight
-            if (KG.first >= 1 && KG.second >= 2)
+            if (x >= 1 && y >= 2)
             {
-                if ((board[KG.first - 1][KG.second - 2])[0] == 'k')
+                if ((board[x - 1][y - 2])[0] == 'k')
                 {
                     return true;
                 }
             }
-            else if (KG.first >= 2 && KG.second >= 1)
+            else if (x >= 2 && y >= 1)
             {
-                if ((board[KG.first - 2][KG.second - 1])[0] == 'k')
+                if ((board[x - 2][y - 1])[0] == 'k')
                 {
                     return true;
                 }
             }
-            else if (KG.first >= 1 && KG.second <= 5)
+            else if (x >= 1 && y <= 5)
             {
-                if ((board[KG.first - 1][KG.second + 2])[0] == 'k')
+                if ((board[x - 1][y + 2])[0] == 'k')
                 {
                     return true;
                 }
             }
-            else if (KG.first <= 6 && KG.second >= 2)
+            else if (x <= 6 && y >= 2)
             {
-                if ((board[KG.first + 1][KG.second - 2])[0] == 'k')
+                if ((board[x + 1][y - 2])[0] == 'k')
                 {
                     return true;
                 }
             }
-            else if (KG.first <= 6 && KG.second <= 5)
+            else if (x <= 6 && y <= 5)
             {
-                if ((board[KG.first + 1][KG.second + 2])[0] == 'k')
+                if ((board[x + 1][y + 2])[0] == 'k')
                 {
                     return true;
                 }
             }
-            else if (KG.first <= 5 && KG.second <= 6)
+            else if (x <= 5 && y <= 6)
             {
-                if ((board[KG.first + 2][KG.second + 1])[0] == 'k')
+                if ((board[x + 2][y + 1])[0] == 'k')
                 {
                     return true;
                 }
             }
-            else if (KG.first >= 2 && KG.second <= 1)
+            else if (x >= 2 && y <= 1)
             {
-                if ((board[KG.first - 2][KG.second + 1])[0] == 'k')
+                if ((board[x - 2][y + 1])[0] == 'k')
                 {
                     return true;
                 }
             }
-            else if (KG.first <= 5 && KG.second >= 1)
+            else if (x <= 5 && y >= 1)
             {
-                if ((board[KG.first + 2][KG.second - 1])[0] == 'k')
+                if ((board[x + 2][y - 1])[0] == 'k')
                 {
                     return true;
                 }
@@ -304,73 +332,80 @@ public:
             // cout << "knight" << endl;
 
             // pawn
-            if ((board[KG.first + 1][KG.second + 1])[0] == 'p')
+            if (x <= 6 && y <= 6)
             {
-                return true;
-            }
-            else if ((board[KG.first + 1][KG.second - 1])[0] == 'p')
-            {
-                return true;
-            }
-            // cout << "pawn" << endl;
-            //  vertical line
-            for (int i = KG.first + 1; i < 8; i++)
-            {
-                if ((board[i][KG.second])[0] == 'q' || (board[i][KG.second])[0] == 'r')
+                if ((board[x + 1][y + 1])[0] == 'p')
                 {
                     return true;
                 }
-                else if (board[i][KG.second] != "  ")
+            }
+            else if (x <= 6 && y >= 1)
+            {
+                if ((board[x + 1][y - 1])[0] == 'p')
+                {
+                    return true;
+                }
+            }
+            // cout << "pawn" << endl;
+            //  vertical line
+            for (int i = x + 1; i < 8; i++)
+            {
+                if ((board[i][y])[0] == 'q' || (board[i][y])[0] == 'r')
+                {
+                    return true;
+                }
+                else if (board[i][y] != "  ")
                 {
                     break;
                 }
             }
-            for (int i = KG.first - 1; i >= 0; i--)
+            for (int i = x - 1; i >= 0; i--)
             {
-                if ((board[i][KG.second])[0] == 'q' || (board[i][KG.second])[0] == 'r')
+                if ((board[i][y])[0] == 'q' || (board[i][y])[0] == 'r')
                 {
                     return true;
                 }
-                else if (board[i][KG.second] != "  ")
+                else if (board[i][y] != "  ")
                 {
                     break;
                 }
             }
             // cout << "vertical" << endl;
             //  horizontal line
-            for (int j = KG.second + 1; j < 8; j++)
+            for (int j = y + 1; j < 8; j++)
             {
-                if ((board[KG.first][j])[0] == 'q' || (board[KG.first][j])[0] == 'r')
+                if ((board[x][j])[0] == 'q' || (board[x][j])[0] == 'r')
                 {
                     return true;
                 }
-                else if (board[KG.first][j] != "  ")
+                else if (board[x][j] != "  ")
                 {
                     break;
                 }
             }
-            for (int j = KG.second - 1; j >= 0; j--)
+            for (int j = y - 1; j >= 0; j--)
             {
-                if ((board[KG.first][j])[0] == 'q' || (board[KG.first][j])[0] == 'r')
+                if ((board[x][j])[0] == 'q' || (board[x][j])[0] == 'r')
                 {
                     return true;
                 }
-                else if (board[KG.first][j] != "  ")
+                else if (board[x][j] != "  ")
                 {
                     break;
                 }
             }
             // cout << "horizontal" << endl;
             //  diagonals
-            int i = KG.first + 1;
-            int j = KG.second + 1;
+            int i = x + 1;
+            int j = y + 1;
             while (i != 8 && j != 8)
             {
                 if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
-                    // cout << KG.first << " " << KG.second << " " << i << " " << j << endl;
+                    // cout << x << " " << y << " " << i << " " << j << endl;
                     // cout << board[i][j];
                     //  cout << " found" << endl;
+
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -381,12 +416,13 @@ public:
                 j++;
             }
             // cout << "diag" << endl;
-            i = KG.first + 1;
-            j = KG.second - 1;
+            i = x + 1;
+            j = y - 1;
             while (i != 8 && j != -1)
             {
                 if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
+
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -398,12 +434,13 @@ public:
             }
 
             // cout << "diag" << endl;
-            i = KG.first - 1;
-            j = KG.second + 1;
+            i = x - 1;
+            j = y + 1;
             while (i != -1 && j != 8)
             {
                 if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
+
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -414,12 +451,13 @@ public:
                 j++;
             }
             // cout << "diag" << endl;
-            i = KG.first - 1;
-            j = KG.second - 1;
+            i = x - 1;
+            j = y - 1;
             while (i != -1 && j != -1)
             {
                 if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
                 {
+
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -433,128 +471,150 @@ public:
         }
         else
         {
+            // king
+            for (int i = max(0, king_x - 1); i <= min(7, king_x + 1); i++)
+            {
+                for (int j = max(0, king_y - 1); j <= min(7, king_y + 1); j++)
+                {
+                    if (board[i][j] == "KG")
+                    {
+                        return true;
+                    }
+                }
+            }
+
             // knight
-            if (KG.first >= 1 && KG.second >= 2)
+            if (x >= 1 && y >= 2)
             {
-                if ((board[KG.first - 1][KG.second - 2])[0] == 'k')
+                if ((board[x - 1][y - 2])[0] == 'K')
                 {
                     return true;
                 }
             }
-            else if (KG.first >= 2 && KG.second >= 1)
+            else if (x >= 2 && y >= 1)
             {
-                if ((board[KG.first - 2][KG.second - 1])[0] == 'k')
+                if ((board[x - 2][y - 1])[0] == 'K')
                 {
                     return true;
                 }
             }
-            else if (KG.first >= 1 && KG.second <= 5)
+            else if (x >= 1 && y <= 5)
             {
-                if ((board[KG.first - 1][KG.second + 2])[0] == 'k')
+                if ((board[x - 1][y + 2])[0] == 'K')
                 {
                     return true;
                 }
             }
-            else if (KG.first <= 6 && KG.second >= 2)
+            else if (x <= 6 && y >= 2)
             {
-                if ((board[KG.first + 1][KG.second - 2])[0] == 'k')
+                if ((board[x + 1][y - 2])[0] == 'K')
                 {
+
                     return true;
                 }
             }
-            else if (KG.first <= 6 && KG.second <= 5)
+            else if (x <= 6 && y <= 5)
             {
-                if ((board[KG.first + 1][KG.second + 2])[0] == 'k')
+                if ((board[x + 1][y + 2])[0] == 'K')
                 {
+
                     return true;
                 }
             }
-            else if (KG.first <= 5 && KG.second <= 6)
+            else if (x <= 5 && y <= 6)
             {
-                if ((board[KG.first + 2][KG.second + 1])[0] == 'k')
+                if ((board[x + 2][y + 1])[0] == 'K')
                 {
+
                     return true;
                 }
             }
-            else if (KG.first >= 2 && KG.second <= 1)
+            else if (x >= 2 && y <= 1)
             {
-                if ((board[KG.first - 2][KG.second + 1])[0] == 'k')
+                if ((board[x - 2][y + 1])[0] == 'K')
                 {
+
                     return true;
                 }
             }
-            else if (KG.first <= 5 && KG.second >= 1)
+            else if (x <= 5 && y >= 1)
             {
-                if ((board[KG.first + 2][KG.second - 1])[0] == 'k')
+                if ((board[x + 2][y - 1])[0] == 'K')
                 {
                     return true;
                 }
             }
 
             // pawn
-            if ((board[kg.first - 1][kg.second + 1])[0] == 'P')
+            if (x >= 1 && y <= 6)
             {
-                return true;
+                if ((board[x - 1][y + 1])[0] == 'p')
+                {
+                    threat.push_back(make_pair(x + 1, y + 1));
+                }
             }
-            else if ((board[kg.first - 1][kg.second - 1])[0] == 'P')
+            else if (x >= 1 && y >= 1)
             {
-                return true;
+                if ((board[x - 1][y - 1])[0] == 'p')
+                {
+                    threat.push_back(make_pair(x + 1, y - 1));
+                }
             }
 
             // vertical line
-            for (int i = kg.first + 1; i < 8; i++)
+            for (int i = x + 1; i < 8; i++)
             {
-                if ((board[i][kg.second])[0] == 'Q' || (board[i][kg.second])[0] == 'R')
+                if ((board[i][y])[0] == 'Q' || (board[i][y])[0] == 'R')
                 {
                     return true;
                 }
-                else if (board[i][kg.second] != "  ")
+                else if (board[i][y] != "  ")
                 {
                     break;
                 }
             }
-            for (int i = kg.first - 1; i >= 0; i--)
+            for (int i = x - 1; i >= 0; i--)
             {
-                if ((board[i][kg.second])[0] == 'Q' || (board[i][kg.second])[0] == 'R')
+                if ((board[i][y])[0] == 'Q' || (board[i][y])[0] == 'R')
                 {
                     return true;
                 }
-                else if (board[i][kg.second] != "  ")
+                else if (board[i][y] != "  ")
                 {
                     break;
                 }
             }
 
             // horizontal line
-            for (int j = kg.second + 1; j < 8; j++)
+            for (int j = y + 1; j < 8; j++)
             {
-                if ((board[kg.first][j])[0] == 'Q' || (board[kg.first][j])[0] == 'R')
+                if ((board[x][j])[0] == 'Q' || (board[x][j])[0] == 'R')
                 {
                     return true;
                 }
-                else if (board[kg.first][j] != "  ")
+                else if (board[x][j] != "  ")
                 {
                     break;
                 }
             }
-            for (int j = kg.second - 1; j >= 0; j--)
+            for (int j = y - 1; j >= 0; j--)
             {
-                if ((board[kg.first][j])[0] == 'Q' || (board[kg.first][j])[0] == 'R')
+                if ((board[x][j])[0] == 'Q' || (board[x][j])[0] == 'R')
                 {
                     return true;
                 }
-                else if (board[kg.first][j] != "  ")
+                else if (board[x][j] != "  ")
                 {
                     break;
                 }
             }
 
             // diagonals
-            int i = kg.first + 1;
-            int j = kg.second + 1;
+            int i = x + 1;
+            int j = y + 1;
             while (i != 8 && j != 8)
             {
-                if ((board[i][i])[0] == 'B' || (board[i][i])[0] == 'Q')
+                if ((board[i][j])[0] == 'B' || (board[i][j])[0] == 'Q')
                 {
                     return true;
                 }
@@ -566,12 +626,13 @@ public:
                 j++;
             }
 
-            i = kg.first + 1;
-            j = kg.second - 1;
+            i = x + 1;
+            j = y - 1;
             while (i != 8 && j != -1)
             {
-                if ((board[i][i])[0] == 'B' || (board[i][i])[0] == 'Q')
+                if ((board[i][j])[0] == 'B' || (board[i][j])[0] == 'Q')
                 {
+
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -582,12 +643,13 @@ public:
                 j--;
             }
 
-            i = kg.first - 1;
-            j = kg.second + 1;
+            i = x - 1;
+            j = y + 1;
             while (i != -1 && j != 8)
             {
-                if ((board[i][i])[0] == 'B' || (board[i][i])[0] == 'Q')
+                if ((board[i][j])[0] == 'B' || (board[i][j])[0] == 'Q')
                 {
+
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -598,12 +660,13 @@ public:
                 j++;
             }
 
-            i = kg.first - 1;
-            j = kg.second - 1;
+            i = x - 1;
+            j = y - 1;
             while (i != -1 && j != -1)
             {
-                if ((board[i][i])[0] == 'B' || (board[i][i])[0] == 'Q')
+                if ((board[i][j])[0] == 'B' || (board[i][j])[0] == 'Q')
                 {
+
                     return true;
                 }
                 else if (board[i][j] != "  ")
@@ -617,10 +680,567 @@ public:
         return false;
     }
 
+    void check_threats(int x, int y, int colour)
+    {
+        // cout << "checking" << endl;
+        if (colour % 2 == 1)
+        {
+            // king
+            for (int i = max(0, king_x - 1); i <= min(7, king_x + 1); i++)
+            {
+                for (int j = max(0, king_y - 1); j <= min(7, king_y + 1); j++)
+                {
+                    if (board[i][j] == "kg")
+                    {
+                        threat.push_back(make_pair(i, j));
+                    }
+                }
+            }
+
+            // knight
+            if (x >= 1 && y >= 2)
+            {
+                if ((board[x - 1][y - 2])[0] == 'k')
+                {
+                    threat.push_back(make_pair(x - 1, y - 2));
+                }
+            }
+            else if (x >= 2 && y >= 1)
+            {
+                if ((board[x - 2][y - 1])[0] == 'k')
+                {
+                    threat.push_back(make_pair(x - 2, y - 1));
+                }
+            }
+            else if (x >= 1 && y <= 5)
+            {
+                if ((board[x - 1][y + 2])[0] == 'k')
+                {
+                    threat.push_back(make_pair(x - 1, y + 2));
+                }
+            }
+            else if (x <= 6 && y >= 2)
+            {
+                if ((board[x + 1][y - 2])[0] == 'k')
+                {
+                    threat.push_back(make_pair(x + 1, y - 2));
+                }
+            }
+            else if (x <= 6 && y <= 5)
+            {
+                if ((board[x + 1][y + 2])[0] == 'k')
+                {
+                    threat.push_back(make_pair(x + 1, y + 2));
+                }
+            }
+            else if (x <= 5 && y <= 6)
+            {
+                if ((board[x + 2][y + 1])[0] == 'k')
+                {
+                    threat.push_back(make_pair(x + 2, y + 1));
+                }
+            }
+            else if (x >= 2 && y <= 1)
+            {
+                if ((board[x - 2][y + 1])[0] == 'k')
+                {
+                    threat.push_back(make_pair(x - 2, y + 1));
+                }
+            }
+            else if (x <= 5 && y >= 1)
+            {
+                if ((board[x + 2][y - 1])[0] == 'k')
+                {
+                    threat.push_back(make_pair(x + 2, y - 1));
+                }
+            }
+            // cout << "knight" << endl;
+
+            // pawn
+            if (x <= 6 && y <= 6)
+            {
+                if ((board[x + 1][y + 1])[0] == 'p')
+                {
+                    threat.push_back(make_pair(x + 1, y + 1));
+                }
+            }
+            else if (x <= 6 && y >= 1)
+            {
+                if ((board[x + 1][y - 1])[0] == 'p')
+                {
+                    threat.push_back(make_pair(x + 1, y - 1));
+                }
+            }
+            // cout << "pawn" << endl;
+            //  vertical line
+            for (int i = x + 1; i < 8; i++)
+            {
+                if ((board[i][y])[0] == 'q' || (board[i][y])[0] == 'r')
+                {
+                    threat.push_back(make_pair(i, y));
+                }
+                else if (board[i][y] != "  ")
+                {
+                    break;
+                }
+            }
+            for (int i = x - 1; i >= 0; i--)
+            {
+                if ((board[i][y])[0] == 'q' || (board[i][y])[0] == 'r')
+                {
+                    threat.push_back(make_pair(i, y));
+                }
+                else if (board[i][y] != "  ")
+                {
+                    break;
+                }
+            }
+            // cout << "vertical" << endl;
+            //  horizontal line
+            for (int j = y + 1; j < 8; j++)
+            {
+                if ((board[x][j])[0] == 'q' || (board[x][j])[0] == 'r')
+                {
+                    threat.push_back(make_pair(x, j));
+                }
+                else if (board[x][j] != "  ")
+                {
+                    break;
+                }
+            }
+            for (int j = y - 1; j >= 0; j--)
+            {
+                if ((board[x][j])[0] == 'q' || (board[x][j])[0] == 'r')
+                {
+                    threat.push_back(make_pair(x, j));
+                }
+                else if (board[x][j] != "  ")
+                {
+                    break;
+                }
+            }
+            // cout << "horizontal" << endl;
+            //  diagonals
+            int i = x + 1;
+            int j = y + 1;
+            while (i != 8 && j != 8)
+            {
+                if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
+                {
+                    // cout << x << " " << y << " " << i << " " << j << endl;
+                    // cout << board[i][j];
+                    //  cout << " found" << endl;
+                    threat.push_back(make_pair(i, j));
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i++;
+                j++;
+            }
+            // cout << "diag" << endl;
+            i = x + 1;
+            j = y - 1;
+            while (i != 8 && j != -1)
+            {
+                if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
+                {
+                    threat.push_back(make_pair(i, j));
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i++;
+                j--;
+            }
+
+            // cout << "diag" << endl;
+            i = x - 1;
+            j = y + 1;
+            while (i != -1 && j != 8)
+            {
+                if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
+                {
+                    threat.push_back(make_pair(i, j));
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i--;
+                j++;
+            }
+            // cout << "diag" << endl;
+            i = x - 1;
+            j = y - 1;
+            while (i != -1 && j != -1)
+            {
+                if ((board[i][j])[0] == 'b' || (board[i][j])[0] == 'q')
+                {
+                    threat.push_back(make_pair(i, j));
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i--;
+                j--;
+            }
+            // cout << "diag" << endl;
+        }
+        else
+        {
+            // king
+            for (int i = max(0, king_x - 1); i <= min(7, king_x + 1); i++)
+            {
+                for (int j = max(0, king_y - 1); j <= min(7, king_y + 1); j++)
+                {
+                    if (board[i][j] == "KG")
+                    {
+                    }
+                }
+            }
+
+            // knight
+            if (x >= 1 && y >= 2)
+            {
+                if ((board[x - 1][y - 2])[0] == 'K')
+                {
+                    threat.push_back(make_pair(x - 1, y - 2));
+                }
+            }
+            else if (x >= 2 && y >= 1)
+            {
+                if ((board[x - 2][y - 1])[0] == 'K')
+                {
+                    threat.push_back(make_pair(x - 2, y - 1));
+                }
+            }
+            else if (x >= 1 && y <= 5)
+            {
+                if ((board[x - 1][y + 2])[0] == 'K')
+                {
+                    threat.push_back(make_pair(x - 1, y + 2));
+                }
+            }
+            else if (x <= 6 && y >= 2)
+            {
+                if ((board[x + 1][y - 2])[0] == 'K')
+                {
+                    threat.push_back(make_pair(x + 1, y - 2));
+                }
+            }
+            else if (x <= 6 && y <= 5)
+            {
+                if ((board[x + 1][y + 2])[0] == 'K')
+                {
+                    threat.push_back(make_pair(x + 1, y + 2));
+                }
+            }
+            else if (x <= 5 && y <= 6)
+            {
+                if ((board[x + 2][y + 1])[0] == 'K')
+                {
+                    threat.push_back(make_pair(x + 2, y + 1));
+                }
+            }
+            else if (x >= 2 && y <= 1)
+            {
+                if ((board[x - 2][y + 1])[0] == 'K')
+                {
+                    threat.push_back(make_pair(x - 2, y + 1));
+                }
+            }
+            else if (x <= 5 && y >= 1)
+            {
+                if ((board[x + 2][y - 1])[0] == 'K')
+                {
+                    threat.push_back(make_pair(x + 2, y - 1));
+                }
+            }
+
+            // pawn
+            if (x >= 1 && y <= 6)
+            {
+                if ((board[x - 1][y + 1])[0] == 'P')
+                {
+                    threat.push_back(make_pair(x - 1, y + 1));
+                }
+            }
+            else if (x >= 1 && y >= 1)
+            {
+                if ((board[x - 1][y - 1])[0] == 'P')
+                {
+                    threat.push_back(make_pair(x - 1, y - 1));
+                }
+            }
+
+            // vertical line
+            for (int i = x + 1; i < 8; i++)
+            {
+                if ((board[i][y])[0] == 'Q' || (board[i][y])[0] == 'R')
+                {
+                    threat.push_back(make_pair(i, y));
+                }
+                else if (board[i][y] != "  ")
+                {
+                    break;
+                }
+            }
+            for (int i = x - 1; i >= 0; i--)
+            {
+                if ((board[i][y])[0] == 'Q' || (board[i][y])[0] == 'R')
+                {
+                    threat.push_back(make_pair(i, y));
+                }
+                else if (board[i][y] != "  ")
+                {
+                    break;
+                }
+            }
+
+            // horizontal line
+            for (int j = y + 1; j < 8; j++)
+            {
+                if ((board[x][j])[0] == 'Q' || (board[x][j])[0] == 'R')
+                {
+                    threat.push_back(make_pair(x, j));
+                }
+                else if (board[x][j] != "  ")
+                {
+                    break;
+                }
+            }
+            for (int j = y - 1; j >= 0; j--)
+            {
+                if ((board[x][j])[0] == 'Q' || (board[x][j])[0] == 'R')
+                {
+                    threat.push_back(make_pair(x, j));
+                }
+                else if (board[x][j] != "  ")
+                {
+                    break;
+                }
+            }
+
+            // diagonals
+            int i = x + 1;
+            int j = y + 1;
+            while (i != 8 && j != 8)
+            {
+                if ((board[i][j])[0] == 'B' || (board[i][j])[0] == 'Q')
+                {
+                    threat.push_back(make_pair(i, j));
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i++;
+                j++;
+            }
+
+            i = x + 1;
+            j = y - 1;
+            while (i != 8 && j != -1)
+            {
+                if ((board[i][j])[0] == 'B' || (board[i][j])[0] == 'Q')
+                {
+                    threat.push_back(make_pair(i, j));
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i++;
+                j--;
+            }
+
+            i = x - 1;
+            j = y + 1;
+            while (i != -1 && j != 8)
+            {
+                if ((board[i][j])[0] == 'B' || (board[i][j])[0] == 'Q')
+                {
+                    threat.push_back(make_pair(i, j));
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i--;
+                j++;
+            }
+
+            i = x - 1;
+            j = y - 1;
+            while (i != -1 && j != -1)
+            {
+                if ((board[i][j])[0] == 'B' || (board[i][j])[0] == 'Q')
+                {
+                    threat.push_back(make_pair(i, j));
+                }
+                else if (board[i][j] != "  ")
+                {
+                    break;
+                }
+                i--;
+                j--;
+            }
+        }
+    }
+
     bool checkmate()
     {
+        cout << "checking for checkmate" << endl;
+        // see if king can move to safety
+        for (int i = max(0, king_x - 1); i <= min(7, king_x + 1); i++)
+        {
+            for (int j = max(0, king_y - 1); j <= min(7, king_y + 1); j++)
+            {
+                if (moves % 2 == 1)
+                {
+                    if (!check(i, j) && (board[i][j] == "  " || (board[i][j])[0] > 95))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (!check(i, j) && (board[i][j] == "  " || (board[i][j])[0] < 95))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        cout << "king can't move" << endl;
 
-        return false;
+        // create a list of threats of king
+        threat.clear();
+        check_threats(king_x, king_y, moves);
+
+        // after this if there is more than one threat left, it is checkmate as both can't be blocked or attacked at the same time
+        if (threat.size() > 1)
+        {
+            return true;
+        }
+        cout << "only one threat" << endl;
+
+        int threat_x = threat[0].first;
+        int threat_y = threat[0].second;
+        // cout << threat_x << " " << threat_y << endl;
+
+        // create list of threats of the threat
+        threat.clear();
+        check_threats(threat_x, threat_y, moves + 1);
+
+        // eliminate the threat
+        string saver, threater;
+        threater = board[threat_x][threat_y];
+        for (int i = 0; i < threat.size(); i++)
+        {
+            // cout << threat[i].first << " " << threat[i].second << endl;
+            saver = board[threat[i].first][threat[i].second];
+
+            // cout << saver << " " <<threater <<endl;
+            board[threat[i].first][threat[i].second] = "  ";
+            board[threat_x][threat_y] = saver;
+            if (!check(king_x, king_y))
+            {
+                board[threat[i].first][threat[i].second] = saver;
+                board[threat_x][threat_y] = threater;
+                return false;
+            }
+            board[threat[i].first][threat[i].second] = saver;
+            board[threat_x][threat_y] = threater;
+        }
+
+        cout << "can't eliminate threat" << endl;
+
+        // block the threat
+        // rook
+        int dir_to_threat_x;
+        int dir_to_threat_y;
+
+        if (king_x > threat_x)
+        {
+            dir_to_threat_x = -1;
+        }
+        else if (king_x < threat_x)
+        {
+            dir_to_threat_x = 1;
+        }
+        else
+        {
+            dir_to_threat_x = 0;
+        }
+
+        if (king_y > threat_y)
+        {
+            dir_to_threat_y = -1;
+        }
+        else if (king_y < threat_y)
+        {
+            dir_to_threat_y = 1;
+        }
+        else
+        {
+            dir_to_threat_y = 0;
+        }
+
+        int block_x = king_x + dir_to_threat_x;
+        int block_y = king_y + dir_to_threat_y;
+        string blocker;
+
+        while (!(block_x == threat_x || block_y == threat_y))
+        {
+            // pawn block
+            if (moves % 2 == 1)
+            {
+                if ((board[block_x - 1][block_y])[0] == 'P')
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if ((board[block_x + 1][block_y])[0] == 'p')
+                {
+                    return false;
+                }
+            }
+            // others
+            threat.clear();
+            check_threats(block_x, block_y, moves + 1);
+            for (int i = 0; i < threat.size(); i++)
+            {
+                blocker = board[threat[i].first][threat[i].second];
+                if (blocker[0] == 'p' || blocker[0] == 'P')
+                {
+                    // removing pawn attack as block
+                    continue;
+                }
+                blocker = board[threat[i].first][threat[i].second];
+
+                // cout << blocker <<endl;
+                board[threat[i].first][threat[i].second] = "  ";
+                board[block_x][block_y] = blocker;
+                if (!check(king_x, king_y))
+                {
+                    board[threat[i].first][threat[i].second] = blocker;
+                    board[block_x][block_y] = "  ";
+                    return false;
+                }
+                board[threat[i].first][threat[i].second] = blocker;
+                board[block_x][block_y] = "  ";
+            }
+            block_x += dir_to_threat_x;
+            block_y += dir_to_threat_y;
+        }
+        return true;
     }
 
     bool algorithm()
@@ -869,7 +1489,8 @@ public:
 
                 if (board[final.first][final.second + (2 * dir)] == "R1" && !R1_move)
                 {
-                    if (check())
+
+                    if (check(king_x, king_y) || check(king_x, king_y + 1) || check(king_x, king_y + 2) || check(king_x, king_y + 3))
                     {
                         return false;
                     }
@@ -886,7 +1507,7 @@ public:
                 }
                 else if (board[final.first][final.second + dir] == "R2" && !R2_move)
                 {
-                    if (check())
+                    if (check(king_x, king_y) || check(king_x, king_y - 1) || check(king_x, king_y - 2))
                     {
                         return false;
                     }
@@ -920,7 +1541,7 @@ public:
                 }
                 if (board[final.first][final.second + (2 * dir)] == "r1" && !r1_move)
                 {
-                    if (check())
+                    if (check(king_x, king_y) || check(king_x, king_y + 1) || check(king_x, king_y + 2) || check(king_x, king_y + 3))
                     {
                         return false;
                     }
@@ -938,7 +1559,7 @@ public:
                 }
                 else if (board[final.first][final.second] == "r2" && !r2_move)
                 {
-                    if (check())
+                    if (check(king_x, king_y) || check(king_x, king_y - 1) || check(king_x, king_y - 2))
                     {
                         return false;
                     }
@@ -1186,7 +1807,7 @@ int main()
     while (!g.game_over)
     {
         g.input();
-        system("cls");
+        // system("cls");
         g.print_board();
     }
 }

@@ -12,7 +12,7 @@ string spacer = "|----+----+----+----+----+----+----+----|";
 string spacer_ends = "-----------------------------------------";
 
 // TO-DO
-// add checkmate function
+// add stalemate and substitution
 // add en passant move using history last line or any other way
 
 class game

@@ -3,21 +3,19 @@
 #include <conio.h>
 using namespace std;
 
-string B1 = "R2K2B2KGQNB1K1R1";
-string B2 = "P8P7P6P5P4P3P2P1";
-string W1 = "r2k2b2kgqnb1k1r1";
-string W2 = "p8p7p6p5p4p3p2p1";
-string column = "ABCDEFGH";
-string spacer = "|----+----+----+----+----+----+----+----|";
-string spacer_ends = "-----------------------------------------";
-
 // TO-DO
-// add stalemate and substitution
 // add en passant move using history last line or any other way
 
 class game
 {
     string board[8][8];
+    string B1 = "R2K2B2KGQNB1K1R1";
+    string B2 = "P8P7P6P5P4P3P2P1";
+    string W1 = "r2k2b2kgqnb1k1r1";
+    string W2 = "p8p7p6p5p4p3p2p1";
+    string column = "ABCDEFGH";
+    string spacer = "|----+----+----+----+----+----+----+----|";
+    string spacer_ends = "-----------------------------------------";
     ofstream history;
     pair<int, int> current;
     pair<int, int> final;
@@ -25,7 +23,7 @@ class game
     pair<int, int> kg = make_pair(7, 3);
     vector<pair<int, int>> threat;
     string piece;
-    bool kg_move, KG_move, R1_move, r1_move, R2_move, r2_move = false;
+    bool kg_move, KG_move, R1_move, r1_move, R2_move, r2_move, substitution = false;
     int king_x, king_y;
 
 public:
@@ -64,6 +62,96 @@ public:
         }
     }
 
+    void do_substitution()
+    {
+        cout << "choose for pawn " << piece << endl;
+        cout << " (1) Queen \n (2) Bishop \n (3) Rook \n (4) Knight \n";
+        int n;
+        cin >> n;
+        bool choice_ok = true;
+        if (piece[0] == 'p')
+        {
+            do
+            {
+                string substitute = "";
+                choice_ok = true;
+                if (n == 1)
+                {
+                    char index = 16 + piece[1];
+                    substitute += 'q';
+                    substitute += index;
+                    board[final.first][final.second] = substitute;
+                }
+                else if (n == 2)
+                {
+                    char index = 16 + piece[1];
+                    substitute += 'b';
+                    substitute += index;
+                    board[final.first][final.second] = substitute;
+                }
+                else if (n == 3)
+                {
+                    char index = 16 + piece[1];
+                    substitute += 'r';
+                    substitute += index;
+                    board[final.first][final.second] = substitute;
+                }
+                else if (n == 4)
+                {
+                    char index = 16 + piece[1];
+                    substitute += 'k';
+                    substitute += index;
+                    board[final.first][final.second] = substitute;
+                }
+                else
+                {
+                    choice_ok = false;
+                }
+            } while (!choice_ok);
+        }
+        else if (piece[0] == 'P')
+        {
+            do
+            {
+                string substitute = "";
+                choice_ok = true;
+                if (n == 1)
+                {
+                    char index = 48 + piece[1];
+                    substitute += 'Q';
+                    substitute += index;
+                    board[final.first][final.second] = substitute;
+                }
+                else if (n == 2)
+                {
+                    char index = 48 + piece[1];
+                    substitute += 'B';
+                    substitute += index;
+                    board[final.first][final.second] = substitute;
+                }
+                else if (n == 3)
+                {
+                    char index = 48 + piece[1];
+                    substitute += 'R';
+                    substitute += index;
+                    board[final.first][final.second] = substitute;
+                }
+                else if (n == 4)
+                {
+                    char index = 48 + piece[1];
+                    substitute += 'K';
+                    substitute += index;
+                    board[final.first][final.second] = substitute;
+                }
+                else
+                {
+                    choice_ok = false;
+                }
+            } while (!choice_ok);
+        }
+        substitution = false;
+    }
+
     void input()
     {
         if (moves % 2 == 1)
@@ -81,11 +169,12 @@ public:
         {
             if (!checkmate())
             {
-                // cout << "CHECK!" << endl;
+                cout << "CHECK" << endl;
             }
             else
             {
-                // cout << "CHECKMATE!";
+                cout << "CHECKMATE" << endl;
+                // cout << king_x <<" " <<king_y <<endl;
                 game_over = true;
                 return;
             }
@@ -195,8 +284,6 @@ public:
 
         if (check(king_x, king_y))
         {
-
-            cout << "CHECK!" << endl;
             board[current.first][current.second] = piece;
             board[final.first][final.second] = "  ";
             if (piece == "KG")
@@ -212,7 +299,10 @@ public:
 
             return;
         }
-
+        if (substitution)
+        {
+            do_substitution();
+        }
         history.open("history.txt", std::ios_base::app);
         if (history.is_open())
         {
@@ -1094,8 +1184,8 @@ public:
 
     bool checkmate()
     {
-        cout << "checking for checkmate" << endl;
-        // see if king can move to safety
+        // cout << "checking for checkmate" << endl;
+        //  see if king can move to safety
         for (int i = max(0, king_x - 1); i <= min(7, king_x + 1); i++)
         {
             for (int j = max(0, king_y - 1); j <= min(7, king_y + 1); j++)
@@ -1116,7 +1206,7 @@ public:
                 }
             }
         }
-        cout << "king can't move" << endl;
+        // cout << "king can't move" << endl;
 
         // create a list of threats of king
         threat.clear();
@@ -1127,7 +1217,7 @@ public:
         {
             return true;
         }
-        cout << "only one threat" << endl;
+        // cout << "only one threat" << endl;
 
         int threat_x = threat[0].first;
         int threat_y = threat[0].second;
@@ -1167,7 +1257,7 @@ public:
             }
         }
 
-        cout << "can't eliminate threat" << endl;
+        // cout << "can't eliminate threat" << endl;
 
         // block the threat
         // rook
@@ -1265,13 +1355,21 @@ public:
                     {
                         if (board[final.first][final.second] == "  ")
                         {
+                            if (final.first == 0)
+                            {
+                                substitution = true;
+                            }
                             return true;
                         }
                     }
-                    else if (board[final.first][final.second] != "  " && (board[final.first][final.second])[0] < 97)
+                    else if (board[final.first][final.second] != "  " && (board[final.first][final.second])[0] < 90)
                     {
                         if (abs(current.second - final.second) == 1)
                         {
+                            if (final.first == 0)
+                            {
+                                substitution = true;
+                            }
                             return true;
                         }
                     }
@@ -1285,6 +1383,10 @@ public:
                     {
                         if (board[final.first][final.second] == "  ")
                         {
+                            if (final.first == 0)
+                            {
+                                substitution = true;
+                            }
                             return true;
                         }
                     }
@@ -1292,6 +1394,10 @@ public:
                     {
                         if (abs(current.second - final.second) == 1)
                         {
+                            if (final.first == 0)
+                            {
+                                substitution = true;
+                            }
                             return true;
                         }
                     }
@@ -1309,6 +1415,10 @@ public:
                     {
                         if (board[final.first][final.second] == "  ")
                         {
+                            if (final.first == 7)
+                            {
+                                substitution = true;
+                            }
                             return true;
                         }
                     }
@@ -1316,6 +1426,10 @@ public:
                     {
                         if (abs(current.second - final.second) == 1)
                         {
+                            if (final.first == 7)
+                            {
+                                substitution = true;
+                            }
                             return true;
                         }
                     }
@@ -1329,6 +1443,10 @@ public:
                     {
                         if (board[final.first][final.second] == "  ")
                         {
+                            if (final.first == 7)
+                            {
+                                substitution = true;
+                            }
                             return true;
                         }
                     }
@@ -1336,6 +1454,10 @@ public:
                     {
                         if (abs(current.second - final.second) == 1)
                         {
+                            if (final.first == 7)
+                            {
+                                substitution = true;
+                            }
                             return true;
                         }
                     }
@@ -1610,7 +1732,7 @@ public:
         }
 
         // queen
-        if (piece == "qn" || piece == "QN")
+        if (piece[0] == 'q' || piece[0] == 'Q')
         {
             bool obstacle = false;
             if ((abs(final.first - current.first) == abs(final.second - current.second)) || (current.first == final.first) || (current.second == final.second))
@@ -1680,14 +1802,14 @@ public:
                     {
                         return true;
                     }
-                    else if (piece == "qn")
+                    else if (piece[0] == 'q')
                     {
                         if ((board[final.first][final.second])[0] < 97)
                         {
                             return true;
                         }
                     }
-                    else if (piece == "QN")
+                    else if (piece[0] == 'Q')
                     {
                         if ((board[final.first][final.second])[0] > 97)
                         {
@@ -1816,7 +1938,7 @@ int main()
     while (!g.game_over)
     {
         g.input();
-        // system("cls");
+        system("cls");
         g.print_board();
     }
 }

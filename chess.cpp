@@ -4,7 +4,8 @@
 using namespace std;
 
 // TO-DO
-// add en passant move using history last line or any other way
+// add stalemate en passant move using history last line or any other way
+// change variables when reading history
 
 class game
 {
@@ -16,13 +17,13 @@ class game
     string column = "ABCDEFGH";
     string spacer = "|----+----+----+----+----+----+----+----|";
     string spacer_ends = "-----------------------------------------";
+    string piece, input, substitute = "";
     ofstream history;
     pair<int, int> current;
     pair<int, int> final;
     pair<int, int> KG = make_pair(0, 3);
     pair<int, int> kg = make_pair(7, 3);
     vector<pair<int, int>> threat;
-    string piece;
     bool kg_move, KG_move, R1_move, r1_move, R2_move, r2_move, substitution = false;
     int king_x, king_y;
 
@@ -71,34 +72,32 @@ public:
         bool choice_ok = true;
         if (piece[0] == 'p')
         {
+            char index = 16 + piece[1];
+
             do
             {
-                string substitute = "";
+                substitute = "";
                 choice_ok = true;
                 if (n == 1)
                 {
-                    char index = 16 + piece[1];
                     substitute += 'q';
                     substitute += index;
                     board[final.first][final.second] = substitute;
                 }
                 else if (n == 2)
                 {
-                    char index = 16 + piece[1];
                     substitute += 'b';
                     substitute += index;
                     board[final.first][final.second] = substitute;
                 }
                 else if (n == 3)
                 {
-                    char index = 16 + piece[1];
                     substitute += 'r';
                     substitute += index;
                     board[final.first][final.second] = substitute;
                 }
                 else if (n == 4)
                 {
-                    char index = 16 + piece[1];
                     substitute += 'k';
                     substitute += index;
                     board[final.first][final.second] = substitute;
@@ -111,34 +110,32 @@ public:
         }
         else if (piece[0] == 'P')
         {
+            char index = 48 + piece[1];
+
             do
             {
-                string substitute = "";
+                substitute = "";
                 choice_ok = true;
                 if (n == 1)
                 {
-                    char index = 48 + piece[1];
                     substitute += 'Q';
                     substitute += index;
                     board[final.first][final.second] = substitute;
                 }
                 else if (n == 2)
                 {
-                    char index = 48 + piece[1];
                     substitute += 'B';
                     substitute += index;
                     board[final.first][final.second] = substitute;
                 }
                 else if (n == 3)
                 {
-                    char index = 48 + piece[1];
                     substitute += 'R';
                     substitute += index;
                     board[final.first][final.second] = substitute;
                 }
                 else if (n == 4)
                 {
-                    char index = 48 + piece[1];
                     substitute += 'K';
                     substitute += index;
                     board[final.first][final.second] = substitute;
@@ -152,7 +149,7 @@ public:
         substitution = false;
     }
 
-    void input()
+    void take_input()
     {
         if (moves % 2 == 1)
         {
@@ -190,7 +187,6 @@ public:
             delta = 65;
         }
 
-        string input;
         bool valid = false;
         bool occur = false;
 
@@ -226,7 +222,15 @@ public:
             }
 
             final.first = input[3] - 49; // input[3] will be as char and not int data type
-            final.second = abs(input[2] - 72);
+
+            if (input[2] < 96)
+            {
+                final.second = abs(input[2] - 72);
+            }
+            else
+            {
+                final.second = abs(input[2] - 104);
+            }
 
             if (occur)
             {
@@ -320,9 +324,24 @@ public:
 
         while (getline(file, line))
         {
+            substitute.clear();
             piece.clear();
             piece += line[0];
             piece += line[1];
+            if (piece[0] < 97 && (piece[1] > 96 && piece[1] < 123))
+            {
+                substitute = piece;
+                piece.clear();
+                piece += 'P';
+                piece += char(line[1] - 48);
+            }
+            else if (piece[0] >= 97 && (piece[1] <= 90 && piece[1] >= 65))
+            {
+                substitute = piece;
+                piece.clear();
+                piece += 'P';
+                piece += char(line[1] - 48);
+            }
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
@@ -336,9 +355,76 @@ public:
             }
 
             final.first = line[3] - 49; // line[3] will be as char and not int data type
-            final.second = abs(line[2] - 72);
 
-            board[final.first][final.second] = board[current.first][current.second];
+            if (line[2] < 96)
+            {
+                final.second = abs(line[2] - 72);
+            }
+            else
+            {
+                final.second = abs(line[2] - 104);
+            }
+            if (piece == "KG")
+            {
+                KG_move = true;
+                KG.first = final.first;
+                KG.second = final.second;
+                if (abs(current.second - final.second) > 1)
+                {
+                    if (final.second > current.second)
+                    {
+                        board[0][7] = "  ";
+                        board[0][4] = "R1";
+                    }
+                    else
+                    {
+                        board[0][0] = "  ";
+                        board[0][2] = "R2";
+                    }
+                }
+            }
+            else if (piece == "kg")
+            {
+                kg_move = true;
+                kg.first = final.first;
+                kg.second = final.second;
+                if (abs(current.second - final.second) > 1)
+                {
+                    if (final.second > current.second)
+                    {
+                        board[7][7] = "  ";
+                        board[7][4] = "r1";
+                    }
+                    else
+                    {
+                        board[7][0] = "  ";
+                        board[7][2] = "r2";
+                    }
+                }
+            }
+
+            if (piece == "R1")
+            {
+                R1_move = true;
+            }
+            else if (piece == "R2")
+            {
+                R2_move = true;
+            }
+            else if (piece == "r1")
+            {
+                r1_move = true;
+            }
+            else if (piece == "r2")
+            {
+                r2_move = true;
+            }
+
+            if (substitute != "")
+            {
+                piece = substitute;
+            }
+            board[final.first][final.second] = piece;
             board[current.first][current.second] = "  ";
             moves++;
         }
@@ -1642,16 +1728,13 @@ public:
                     {
                         return false;
                     }
-                    int i = current.first + dir;
-                    while (i != final.second)
+                    for (int i = current.second + dir; i != final.second + dir; i += dir)
                     {
                         if (board[current.first][i] != "  ")
                         {
                             return false;
                         }
-                        i += dir;
                     }
-
                     board[current.first][final.second - dir] = "R2";
                     board[current.first][final.second + dir] = "  ";
                     return true;
@@ -1659,7 +1742,6 @@ public:
             }
             else if (piece == "kg" && !kg_move)
             {
-
                 bool obstacle = false;
                 int dir;
                 if (final.second > current.second)
@@ -1683,25 +1765,23 @@ public:
                             return false;
                         }
                     }
-
                     board[current.first][final.second - dir] = "r1";
                     board[current.first][final.second + (2 * dir)] = "  ";
                     return true;
                 }
-                else if (board[final.first][final.second] == "r2" && !r2_move)
+                else if (board[final.first][final.second + dir] == "r2" && !r2_move)
                 {
                     if (check(king_x, king_y) || check(king_x, king_y - 1) || check(king_x, king_y - 2))
                     {
                         return false;
                     }
-                    for (int i = current.second + dir; i != final.second; i += dir)
+                    for (int i = current.second + dir; i != final.second + dir; i += dir)
                     {
                         if (board[current.first][i] != "  ")
                         {
                             return false;
                         }
                     }
-
                     board[current.first][final.second - dir] = "r2";
                     board[current.first][final.second + dir] = "  ";
                     return true;
@@ -1927,6 +2007,18 @@ public:
             cout << endl;
         }
     }
+
+    void print_winner()
+    {
+        if (moves % 2 == 0)
+        {
+            cout << "WHITE WINS" << endl;
+        }
+        else
+        {
+            cout << "BLACK WINS" << endl;
+        }
+    }
 };
 
 int main()
@@ -1937,8 +2029,12 @@ int main()
     g.print_board();
     while (!g.game_over)
     {
-        g.input();
+        g.take_input();
         system("cls");
         g.print_board();
     }
+    g.print_winner();
+    cout << endl
+         << "Press any key to exit...";
+    while (!_getch()){};
 }

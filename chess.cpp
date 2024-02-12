@@ -5,7 +5,6 @@ using namespace std;
 
 // TO-DO
 // add stalemate en passant move using history last line or any other way
-// change variables when reading history
 
 class game
 {
@@ -580,7 +579,7 @@ public:
                 {
                     // cout << x << " " << y << " " << i << " " << j << endl;
                     // cout << board[i][j];
-                    //  cout << " found" << endl;
+                    // cout << " found" << endl;
 
                     return true;
                 }
@@ -862,12 +861,14 @@ public:
         if (colour % 2 == 1)
         {
             // king
-            for (int i = max(0, king_x - 1); i <= min(7, king_x + 1); i++)
+            // cout << "hello" <<endl;
+            for (int i = max(0, x - 1); i <= min(7, x + 1); i++)
             {
-                for (int j = max(0, king_y - 1); j <= min(7, king_y + 1); j++)
+                for (int j = max(0, y - 1); j <= min(7, y + 1); j++)
                 {
                     if (board[i][j] == "kg")
                     {
+                        // cout << "hello" <<endl;
                         threat.push_back(make_pair(i, j));
                     }
                 }
@@ -1069,12 +1070,13 @@ public:
         else
         {
             // king
-            for (int i = max(0, king_x - 1); i <= min(7, king_x + 1); i++)
+            for (int i = max(0, x - 1); i <= min(7, x + 1); i++)
             {
-                for (int j = max(0, king_y - 1); j <= min(7, king_y + 1); j++)
+                for (int j = max(0, y - 1); j <= min(7, y + 1); j++)
                 {
                     if (board[i][j] == "KG")
                     {
+                        threat.push_back(make_pair(i, j));
                     }
                 }
             }
@@ -1316,10 +1318,14 @@ public:
         // eliminate the threat
         string saver, threater;
         threater = board[threat_x][threat_y];
+        // cout << threater <<endl;
+        // cout << threat_x <<" " <<threat_y <<endl;
         for (int i = 0; i < threat.size(); i++)
         {
             // cout << threat[i].first << " " << threat[i].second << endl;
             saver = board[threat[i].first][threat[i].second];
+            // cout << saver <<endl;
+            // cout << threat[i].first <<" " <<threat[i].second <<endl;
             if (saver == "KG" || saver == "kg")
             {
                 king_x = threat_x;
@@ -1375,7 +1381,8 @@ public:
         {
             dir_to_threat_y = 0;
         }
-
+        // cout << king_x << " " <<king_y <<endl;
+        // cout << dir_to_threat_x <<" " << dir_to_threat_y <<endl;
         int block_x = king_x + dir_to_threat_x;
         int block_y = king_y + dir_to_threat_y;
         string blocker;
@@ -1403,9 +1410,9 @@ public:
             for (int i = 0; i < threat.size(); i++)
             {
                 blocker = board[threat[i].first][threat[i].second];
-                if (blocker[0] == 'p' || blocker[0] == 'P')
+                if (blocker[0] == 'p' || blocker[0] == 'P' || blocker == "KG" || blocker == "kg")
                 {
-                    // removing pawn attack as block
+                    // removing pawn and king attack as block
                     continue;
                 }
                 blocker = board[threat[i].first][threat[i].second];
@@ -2036,5 +2043,7 @@ int main()
     g.print_winner();
     cout << endl
          << "Press any key to exit...";
-    while (!_getch()){};
+    while (!_getch())
+    {
+    };
 }

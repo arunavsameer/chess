@@ -16,19 +16,21 @@ class game
     string column = "ABCDEFGH";
     string spacer = "|----+----+----+----+----+----+----+----|";
     string spacer_ends = "-----------------------------------------";
-    string piece, input, substitute = "";
+    string piece, taken, input, substitute = "";
     ofstream history;
     pair<int, int> current;
+    pair<int, int> points = make_pair(0, 0);
     pair<int, int> final;
     pair<int, int> KG = make_pair(0, 3);
     pair<int, int> kg = make_pair(7, 3);
+    pair<vector<string>, vector<string>> taken_pieces;
     vector<pair<int, int>> threat;
     bool kg_move, KG_move, R1_move, r1_move, R2_move, r2_move, substitution = false;
     int king_x, king_y;
+    int moves = 1;
 
 public:
     bool game_over = false;
-    int moves = 1;
 
     void reset_board()
     {
@@ -148,6 +150,91 @@ public:
         substitution = false;
     }
 
+    void add_points(char a)
+    {
+        if (moves % 2 == 1)
+        {
+            if (a == 'p')
+            {
+                points.first += 1;
+            }
+            else if (a == 'k' || a == 'b')
+            {
+                points.first += 3;
+            }
+            else if (a == 'r')
+            {
+                points.first += 5;
+            }
+            else if (a == 'q')
+            {
+                points.first += 9;
+            }
+        }
+        else
+        {
+            if (a == 'P')
+            {
+                points.second += 1;
+            }
+            else if (a == 'K' || a == 'B')
+            {
+                points.second += 3;
+            }
+            else if (a == 'R')
+            {
+                points.second += 5;
+            }
+            else if (a == 'Q')
+            {
+                points.second += 9;
+            }
+        }
+    }
+
+    void add_taken(string a)
+    {
+        if (a != "  ")
+        {
+            if (moves % 2 == 1)
+            {
+                taken_pieces.first.push_back(a);
+            }
+            else
+            {
+                taken_pieces.second.push_back(a);
+            }
+        }
+    }
+
+    void print_taken(int a)
+    {
+        if (a % 2 == 1)
+        {
+            for (auto i : taken_pieces.first)
+            {
+                cout << i << " ";
+            }
+            if (points.first > points.second)
+            {
+                cout << "(+" << points.first - points.second << ")";
+            }
+            cout << endl;
+        }
+        else
+        {
+            for (auto i : taken_pieces.second)
+            {
+                cout << i << " ";
+            }
+            if (points.second > points.first)
+            {
+                cout << "(+" << points.second - points.first << ")";
+            }
+            cout << endl;
+        }
+    }
+
     void take_input()
     {
         if (moves % 2 == 1)
@@ -241,6 +328,7 @@ public:
         } while (!valid);
 
         // doing the checks after move
+        taken = board[final.first][final.second];
         board[final.first][final.second] = piece;
         board[current.first][current.second] = "  ";
 
@@ -288,7 +376,7 @@ public:
         if (check(king_x, king_y))
         {
             board[current.first][current.second] = piece;
-            board[final.first][final.second] = "  ";
+            board[final.first][final.second] = taken;
             if (piece == "KG")
             {
                 KG.first = current.first;
@@ -306,6 +394,10 @@ public:
         {
             do_substitution();
         }
+
+        add_points(taken[0]);
+        add_taken(taken);
+
         history.open("history.txt", std::ios_base::app);
         if (history.is_open())
         {
@@ -320,7 +412,7 @@ public:
     {
         ifstream file("history.txt");
         string line;
-
+        moves = 1;
         while (getline(file, line))
         {
             substitute.clear();
@@ -423,6 +515,8 @@ public:
             {
                 piece = substitute;
             }
+            add_points((board[final.first][final.second])[0]);
+            add_taken(board[final.first][final.second]);
             board[final.first][final.second] = piece;
             board[current.first][current.second] = "  ";
             moves++;
@@ -1914,6 +2008,8 @@ public:
     {
         if (moves % 2 == 0)
         {
+            cout << "   ";
+            print_taken(1);
             cout << " ";
             for (int i = 0; i < 8; i++)
             {
@@ -1961,10 +2057,14 @@ public:
             {
                 cout << "    " << column[7 - i];
             }
-            cout << endl;
+            cout << endl
+                 << "   ";
+            print_taken(0);
         }
         else
         {
+            cout << "   ";
+            print_taken(0);
             cout << " ";
             for (int i = 0; i < 8; i++)
             {
@@ -2011,7 +2111,9 @@ public:
             {
                 cout << "    " << column[i];
             }
-            cout << endl;
+            cout << endl
+                 << "   ";
+            print_taken(1);
         }
     }
 
@@ -2043,7 +2145,5 @@ int main()
     g.print_winner();
     cout << endl
          << "Press any key to exit...";
-    while (!_getch())
-    {
-    };
+    while (!_getch()){};
 }

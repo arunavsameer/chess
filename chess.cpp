@@ -5,6 +5,7 @@ using namespace std;
 
 // TO-DO
 // add stalemate en passant move using history last line or any other way
+// try to add colour to terminal(what tanishq sent)
 
 class game
 {
@@ -1888,6 +1889,7 @@ public:
                     return true;
                 }
             }
+
             // king normal move
             if (abs(final.first - current.first) == 1 || abs(final.second - current.second) == 1)
             {
@@ -2006,6 +2008,7 @@ public:
 
     void print_board()
     {
+        cout << "--" << spacer_ends << "--" << endl;
         if (moves % 2 == 0)
         {
             cout << "   ";
@@ -2115,6 +2118,7 @@ public:
                  << "   ";
             print_taken(1);
         }
+        cout << "--" << spacer_ends << "--" << endl;
     }
 
     void print_winner()
